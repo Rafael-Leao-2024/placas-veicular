@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Produto{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow p-6">
+        <h1 class="text-2xl font-bold mb-6">Editar Produto</h1>
+        
+        <form method="POST">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 mb-2">Código</label>
+                    <input type="text" name="codigo" value="{{ produto.codigo or '' }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 mb-2">Descrição *</label>
+                    <input type="text" name="descricao" value="{{ produto.descricao }}" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 mb-2">Preço de Venda *</label>
+                    <input type="number" step="0.01" name="preco_venda" value="{{ produto.preco_venda }}" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 mb-2">Estoque Atual</label>
+                    <input type="number" name="estoque_atual" value="{{ produto.estoque_atual }}" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500">
+                    <p class="text-sm text-gray-500 mt-1">Ajuste manual do estoque se necessário</p>
+                </div>
+                
+                <div class="flex space-x-4 pt-4">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition">
+                        Salvar Alterações
+                    </button>
+                    <a href="{{ url_for('estoque.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition">
+                        Cancelar
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

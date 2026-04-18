@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Estoque - Produtos{% endblock %}
+
+{% block content %}
+<div class="space-y-4 md:space-y-6">
+    <!-- Cabeçalho -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">📦 Estoque de Produtos</h1>
+        <a href="{{ url_for('estoque.novo') }}" 
+           class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition text-center w-full sm:w-auto shadow-md hover:shadow-lg active:transform active:scale-95">
+            + Novo Produto
+        </a>
+    </div>
+    
+    <!-- Cards para Mobile (visível apenas em telas pequenas) -->
+    <div class="block md:hidden space-y-3">
+        {% for produto in produtos %}
+        <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex justify-between items-start mb-2">
+                <div class="flex-1">
+                    <h3 class="font-bold text-gray-800 text-lg">{{ produto.descricao }}</h3>
+                    <p class="text-sm text-gray-500">Código: {{ produto.codigo or '-' }}</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-lg font-bold text-blue-600">R$ {{ "%.2f"|format(produto.preco_venda) }}</div>
+                </div>
+            </div>
+            
+            <div class="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm text-gray-600">Estoque:</span>
+                    {% if produto.estoque_atual <= 5 %}
+                        <span class="text-red-600 font-bold text-lg">{{ produto.estoque_atual }}</span>
+                        <span class="text-xs text-red-500">(Baixo)</span>
+                    {% else %}
+                        <span class="text-green-600 font-bold text-lg">{{ produto.estoque_atual }}</span>
+                    {% endif %}
+                </div>
+                
+                <div class="flex space-x-3">
+                    <a href="{{ url_for('estoque.editar', produto_id=produto.id) }}" 
+                       class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                        ✏️ Editar
+                    </a>
+                    <a href="{{ url_for('estoque.excluir', produto_id=produto.id) }}" 
+                       class="text-red-600 hover:text-red-800 text-sm font-medium"
+                       onclick="return confirm('Tem certeza que deseja excluir este produto?')">
+                        🗑️ Excluir
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+            <div class="flex items-center">
+                <span class="text-2xl mr-3">📭</span>
+                <div>
+                    <p class="text-yellow-700 font-semibold">Nenhum produto cadastrado</p>
+                    <p class="text-sm text-yellow-600">Clique em "Novo Produto" para começar</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Tabela para Desktop (visível apenas em telas médias/grandes) -->
+    <div class="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Código</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Descrição</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Preço</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Estoque</th>
+                        <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for produto in produtos %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">{{ produto.codigo or '-' }}</td>
+                        <td class="px-4 py-3 text-sm text-gray-900">{{ produto.descricao }}</td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900 text-right">
+                            <span class="font-semibold">R$ {{ "%.2f"|format(produto.preco_venda) }}</span>
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-sm text-right">
+                            {% if produto.estoque_atual <= 0 %}
+                                <span class="text-red-600 font-semibold bg-red-50 px-2 py-1 rounded">🔴 {{ produto.estoque_atual }}</span>
+                            {% elif produto.estoque_atual <= 5 %}
+                                <span class="text-orange-600 font-semibold bg-orange-50 px-2 py-1 rounded">⚠️ {{ produto.estoque_atual }}</span>
+                            {% else %}
+                                <span class="text-green-600 font-semibold bg-green-50 px-2 py-1 rounded">✅ {{ produto.estoque_atual }}</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-4 py-3 whitespace-nowrap text-right text-sm">
+                            <a href="{{ url_for('estoque.editar', produto_id=produto.id) }}" 
+                               class="text-blue-600 hover:text-blue-800 mr-3 inline-flex items-center">
+                                ✏️ Editar
+                            </a>
+                            <a href="{{ url_for('estoque.excluir', produto_id=produto.id) }}" 
+                               class="text-red-600 hover:text-red-800 inline-flex items-center"
+                               onclick="return confirm('⚠️ Tem certeza que deseja excluir este produto?\n\nEsta ação não poderá ser desfeita!')">
+                                🗑️ Excluir
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="px-4 py-8 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <span class="text-5xl mb-3">📭</span>
+                                <p class="text-gray-500 font-medium">Nenhum produto cadastrado</p>
+                                <p class="text-sm text-gray-400 mt-1">Clique em "Novo Produto" para adicionar</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Resumo rápido (opcional) -->
+    {% if produtos %}
+    <div class="bg-blue-50 rounded-lg p-3 md:p-4">
+        <div class="flex flex-wrap justify-between items-center gap-2 text-sm">
+            <div class="flex items-center space-x-2">
+                <span class="text-blue-600">📊</span>
+                <span class="text-gray-700">Total de produtos:</span>
+                <span class="font-bold text-blue-600">{{ produtos|length }}</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-green-600">✅</span>
+                <span class="text-gray-700">Estoque total:</span>
+                <span class="font-bold text-green-600">{{ produtos|sum(attribute='estoque_atual') }}</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="text-red-600">⚠️</span>
+                <span class="text-gray-700">Produtos com estoque baixo (≤5):</span>
+                <span class="font-bold text-red-600">{{ produtos|selectattr('estoque_atual', 'le', 5)|list|length }}</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+{% block extra_scripts %}
+<script>
+    // Adicionar confirmação adicional para exclusão
+    document.querySelectorAll('a[onclick*="confirm"]').forEach(link => {
+        const originalOnclick = link.getAttribute('onclick');
+        link.removeAttribute('onclick');
+        link.addEventListener('click', function(e) {
+            if (!confirm('⚠️ Tem certeza que deseja excluir este produto?\n\nEsta ação não poderá ser desfeita!')) {
+                e.preventDefault();
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório Mensal - Fluxo de Caixa{% endblock %}
+
+{% block content %}
+<div class="space-y-4 md:space-y-6">
+    <!-- Cabeçalho -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">📅 Relatório Mensal</h1>
+            <p class="text-sm text-gray-500 mt-1">Acompanhe as vendas e recebimentos do mês</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ url_for('relatorios.exportar_mensal', mes=mes, ano=ano) }}" 
+               class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition shadow-md hover:shadow-lg active:transform active:scale-95 inline-flex items-center">
+                📥 Exportar CSV
+            </a>
+            <a href="{{ url_for('dashboard') }}" 
+               class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition shadow-md hover:shadow-lg active:transform active:scale-95 inline-flex items-center">
+                ← Voltar
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filtro de Mês Melhorado -->
+    <div class="bg-white rounded-lg shadow-md p-4">
+        <form method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <label class="font-semibold text-gray-700">📆 Mês/Ano:</label>
+            <select name="mes" class="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                <option value="1" {% if mes == 1 %}selected{% endif %}>Janeiro</option>
+                <option value="2" {% if mes == 2 %}selected{% endif %}>Fevereiro</option>
+                <option value="3" {% if mes == 3 %}selected{% endif %}>Março</option>
+                <option value="4" {% if mes == 4 %}selected{% endif %}>Abril</option>
+                <option value="5" {% if mes == 5 %}selected{% endif %}>Maio</option>
+                <option value="6" {% if mes == 6 %}selected{% endif %}>Junho</option>
+                <option value="7" {% if mes == 7 %}selected{% endif %}>Julho</option>
+                <option value="8" {% if mes == 8 %}selected{% endif %}>Agosto</option>
+                <option value="9" {% if mes == 9 %}selected{% endif %}>Setembro</option>
+                <option value="10" {% if mes == 10 %}selected{% endif %}>Outubro</option>
+                <option value="11" {% if mes == 11 %}selected{% endif %}>Novembro</option>
+                <option value="12" {% if mes == 12 %}selected{% endif %}>Dezembro</option>
+            </select>
+            <input type="number" name="ano" value="{{ ano }}" min="2020" max="2030" 
+                   class="border border-gray-300 rounded-lg px-3 py-2 w-28 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            <button type="submit" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition shadow-md hover:shadow-lg active:transform active:scale-95">
+                🔍 Filtrar
+            </button>
+        </form>
+    </div>
+    
+    <!-- Cards de Resumo Melhorados -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-md p-4 md:p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-gray-600 text-sm mb-1">💰 Total de Vendas</div>
+                    <div class="text-2xl md:text-3xl font-bold text-blue-600">R$ {{ "%.2f"|format(total_vendas|default(0)) }}</div>
+                </div>
+                <div class="text-4xl">💰</div>
+            </div>
+            <div class="text-xs text-gray-500 mt-2">Valor total em vendas no mês</div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-md p-4 md:p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-gray-600 text-sm mb-1">✅ Total Recebido</div>
+                    <div class="text-2xl md:text-3xl font-bold text-green-600">R$ {{ "%.2f"|format(total_recebido|default(0)) }}</div>
+                </div>
+                <div class="text-4xl">✅</div>
+            </div>
+            <div class="text-xs text-gray-500 mt-2">Vendas pagas no mês</div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-lg shadow-md p-4 md:p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-gray-600 text-sm mb-1">⏳ Total a Receber</div>
+                    <div class="text-2xl md:text-3xl font-bold text-red-600">R$ {{ "%.2f"|format(total_devendo|default(0)) }}</div>
+                </div>
+                <div class="text-4xl">⏳</div>
+            </div>
+            <div class="text-xs text-gray-500 mt-2">Vendas pendentes (fiado)</div>
+        </div>
+    </div>
+    
+    <!-- Cards para Mobile (Lista de Vendas) -->
+    <div class="block md:hidden space-y-3">
+        <div class="bg-white rounded-lg shadow-md p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-bold text-gray-800">📋 Vendas do Mês</h2>
+                <span class="text-xs bg-gray-100 px-2 py-1 rounded">{{ vendas|length }} vendas</span>
+            </div>
+            {% if vendas %}
+                {% for venda in vendas %}
+                <div class="border-b border-gray-100 last:border-0 py-3">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <div class="font-semibold text-gray-800">{{ venda.cliente_nome }}</div>
+                            <div class="text-xs text-gray-500">{{ venda.vendedor.user.name }}</div>
+                            <div class="text-xs text-gray-400 mt-1">📅 {{ venda.data.strftime('%d/%m/%Y') }}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-blue-600">R$ {{ "%.2f"|format(venda.total) }}</div>
+                            <div class="text-xs">
+                                {% if venda.pago %}
+                                    <span class="text-green-600">✅ Pago</span>
+                                {% else %}
+                                    <span class="text-red-600">⏳ Pendente</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="px-2 py-1 rounded text-xs
+                            {% if venda.forma_pagamento == 'fiado' %}bg-yellow-100 text-yellow-800
+                            {% elif venda.forma_pagamento == 'dinheiro' %}bg-green-100 text-green-800
+                            {% elif venda.forma_pagamento == 'pix' %}bg-blue-100 text-blue-800
+                            {% else %}bg-purple-100 text-purple-800{% endif %}">
+                            {% if venda.forma_pagamento == 'fiado' %}💰 Fiado
+                            {% elif venda.forma_pagamento == 'dinheiro' %}💵 Dinheiro
+                            {% elif venda.forma_pagamento == 'pix' %}📱 PIX
+                            {% else %}💳 Cartão{% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-8">
+                    <div class="text-5xl mb-3">📭</div>
+                    <p class="text-gray-500">Nenhuma venda registrada neste mês</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Tabela para Desktop (Lista de Vendas) -->
+    <div class="hidden md:block bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-semibold text-gray-800">📋 Vendas do Mês</h2>
+                    <p class="text-sm text-gray-500 mt-1">{{ nome_mes|title }}/{{ ano }} - {{ vendas|length }} venda(s) registrada(s)</p>
+                </div>
+                <div class="text-sm font-semibold text-blue-600">
+                    Mês: {{ nome_mes|title }}
+                </div>
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendedor</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pagamento</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for venda in vendas %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 text-sm text-gray-900">
+                            <div class="flex items-center space-x-2">
+                                <span>📅</span>
+                                <span>{{ venda.data.strftime('%d/%m/%Y') }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900 font-medium">{{ venda.cliente_nome }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ venda.vendedor.user.name }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900 text-right font-bold">R$ {{ "%.2f"|format(venda.total) }}</td>
+                        <td class="px-6 py-4 text-sm">
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold
+                                {% if venda.forma_pagamento == 'fiado' %}bg-yellow-100 text-yellow-800
+                                {% elif venda.forma_pagamento == 'dinheiro' %}bg-green-100 text-green-800
+                                {% elif venda.forma_pagamento == 'pix' %}bg-blue-100 text-blue-800
+                                {% else %}bg-purple-100 text-purple-800{% endif %}">
+                                {% if venda.forma_pagamento == 'fiado' %}💰 Fiado
+                                {% elif venda.forma_pagamento == 'dinheiro' %}💵 Dinheiro
+                                {% elif venda.forma_pagamento == 'pix' %}📱 PIX
+                                {% else %}💳 Cartão{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            {% if venda.pago %}
+                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">✅ Pago</span>
+                            {% else %}
+                                <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">⏳ Pendente</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <span class="text-5xl mb-3">📭</span>
+                                <p class="text-gray-500 font-medium">Nenhuma venda registrada neste mês</p>
+                                <p class="text-sm text-gray-400 mt-1">Selecione outro mês ou registre uma nova venda</p>
+                                <a href="{{ url_for('vendas.nova') }}" class="mt-3 bg-green-600 text-white px-4 py-2 rounded-lg text-sm">
+                                    ➕ Nova Venda
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Informações adicionais (quando tem vendas) -->
+    {% if vendas %}
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-md p-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="text-center">
+                <div class="text-blue-600 text-xl mb-1">📊</div>
+                <div class="text-gray-600 text-sm">Total de Transações</div>
+                <div class="font-bold text-gray-800 text-lg">{{ vendas|length }}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-green-600 text-xl mb-1">💵</div>
+                <div class="text-gray-600 text-sm">Ticket Médio</div>
+                <div class="font-bold text-gray-800 text-lg">R$ {{ "%.2f"|format(total_vendas / vendas|length if vendas|length > 0 else 0) }}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-purple-600 text-xl mb-1">📈</div>
+                <div class="text-gray-600 text-sm">Taxa de Pagamento</div>
+                <div class="font-bold text-gray-800 text-lg">{{ "%.1f"|format((total_recebido / total_vendas * 100) if total_vendas > 0 else 0) }}%</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Comparativo com mês anterior (simulado) -->
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <span class="text-2xl">💡</span>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-semibold text-yellow-800">Dica de Gestão</h3>
+                <div class="mt-1 text-sm text-yellow-700">
+                    <p>• Total de vendas: <strong>{{ vendas|length }}</strong> transações</p>
+                    <p>• Valor médio por venda: <strong>R$ {{ "%.2f"|format(total_vendas / vendas|length if vendas|length > 0 else 0) }}</strong></p>
+                    <p>• Meta para o próximo mês: aumentar em 10% as vendas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Auto-refresh report every 30 seconds
+    let refreshInterval;
+    
+    function startAutoRefresh() {
+        refreshInterval = setInterval(function() {
+            // Mostrar indicador de recarregamento
+            showRefreshIndicator();
+            location.reload();
+        }, 30000);
+    }
+    
+    function showRefreshIndicator() {
+        let indicator = document.createElement('div');
+        indicator.innerHTML = '🔄 Atualizando relatório mensal...';
+        indicator.style.position = 'fixed';
+        indicator.style.bottom = '20px';
+        indicator.style.right = '20px';
+        indicator.style.backgroundColor = '#3B82F6';
+        indicator.style.color = 'white';
+        indicator.style.padding = '8px 16px';
+        indicator.style.borderRadius = '8px';
+        indicator.style.fontSize = '12px';
+        indicator.style.zIndex = '9999';
+        indicator.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        document.body.appendChild(indicator);
+        
+        setTimeout(() => {
+            indicator.remove();
+        }, 2000);
+    }
+    
+    // Iniciar auto-refresh
+    startAutoRefresh();
+    
+    // Limpar intervalo quando a página for descarregada
+    window.addEventListener('beforeunload', function() {
+        if (refreshInterval) {
+            clearInterval(refreshInterval);
+        }
+    });
+    
+    // Validação do ano
+    const anoInput = document.querySelector('input[name="ano"]');
+    if (anoInput) {
+        anoInput.addEventListener('change', function() {
+            let ano = parseInt(this.value);
+            if (ano < 2020) this.value = 2020;
+            if (ano > 2030) this.value = 2030;
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}Painel Administrativo - Fluxo de Caixa{% endblock %}
+
+{% block content %}
+<div class="space-y-4 md:space-y-8">
+    <!-- Cabeçalho -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">⚙️ Painel Administrativo</h1>
+            <p class="text-sm text-gray-500 mt-1">Gerencie vendedores e lojas do sistema</p>
+        </div>
+        <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-lg text-sm font-semibold shadow-sm">
+            🔐 Acesso Restrito - Administrador
+        </div>
+    </div>
+    
+    <!-- Cards de Resumo -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg shadow-md p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-gray-600 text-sm">👥 Total de Vendedores</div>
+                    <div class="text-2xl font-bold text-purple-600">{{ vendedores|length }}</div>
+                </div>
+                <div class="text-3xl">👥</div>
+            </div>
+            <div class="text-xs text-gray-500 mt-2">
+                {% set ativos = vendedores|selectattr('ativo', 'equalto', True)|list|length %}
+                {% set inativos = vendedores|selectattr('ativo', 'equalto', False)|list|length %}
+                <span class="text-green-600">✅ Ativos: {{ ativos }}</span> | 
+                <span class="text-red-600">❌ Inativos: {{ inativos }}</span>
+            </div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg shadow-md p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-gray-600 text-sm">🏪 Total de Lojas</div>
+                    <div class="text-2xl font-bold text-indigo-600">{{ lojas|length }}</div>
+                </div>
+                <div class="text-3xl">🏪</div>
+            </div>
+            <div class="text-xs text-gray-500 mt-2">
+                {% set lojas_ativas = lojas|selectattr('ativo', 'equalto', True)|list|length %}
+                {% set lojas_inativas = lojas|selectattr('ativo', 'equalto', False)|list|length %}
+                <span class="text-green-600">✅ Ativas: {{ lojas_ativas }}</span> | 
+                <span class="text-red-600">❌ Inativas: {{ lojas_inativas }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gerenciar Vendedores -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 md:px-6 py-3 md:py-4 border-b">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div>
+                    <h2 class="text-lg md:text-xl font-semibold text-gray-800">👥 Gerenciar Vendedores</h2>
+                    <p class="text-xs text-gray-500 mt-1">Ative ou desative o acesso dos vendedores ao sistema</p>
+                </div>
+                <div class="text-xs bg-gray-200 px-2 py-1 rounded">
+                    Total: {{ vendedores|length }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cards para Mobile (Vendedores) -->
+        <div class="block md:hidden divide-y divide-gray-100">
+            {% for vendedor in vendedores %}
+            <div class="p-4 hover:bg-gray-50 transition">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <div class="font-semibold text-gray-800">{{ vendedor.user.name }}</div>
+                        <div class="text-xs text-gray-500">{{ vendedor.user.email }}</div>
+                        <div class="text-xs text-gray-400 mt-1">🏪 {{ vendedor.loja.nome }}</div>
+                    </div>
+                    <div class="text-right">
+                        {% if vendedor.ativo %}
+                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">✅ Ativo</span>
+                        {% else %}
+                            <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">❌ Inativo</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="{{ url_for('admin.toggle_vendedor', vendedor_id=vendedor.id) }}" 
+                       class="inline-flex items-center justify-center w-full px-4 py-2 rounded-lg text-sm font-semibold transition shadow-sm
+                              {% if vendedor.ativo %}bg-red-600 hover:bg-red-700 text-white{% else %}bg-green-600 hover:bg-green-700 text-white{% endif %}">
+                        {% if vendedor.ativo %}
+                            🔒 Desativar Acesso
+                        {% else %}
+                            🔓 Ativar Acesso
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="p-8 text-center">
+                <div class="text-5xl mb-3">👥</div>
+                <p class="text-gray-500">Nenhum vendedor cadastrado</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Tabela para Desktop (Vendedores) -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loja</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ação</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for vendedor in vendedores %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ vendedor.user.name }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ vendedor.user.email }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">
+                            <span class="inline-flex items-center">
+                                🏪 {{ vendedor.loja.nome }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-center">
+                            {% if vendedor.ativo %}
+                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">✅ Ativo</span>
+                            {% else %}
+                                <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">❌ Inativo</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-center">
+                            <a href="{{ url_for('admin.toggle_vendedor', vendedor_id=vendedor.id) }}" 
+                               class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold transition shadow-sm
+                                      {% if vendedor.ativo %}bg-red-600 hover:bg-red-700 text-white{% else %}bg-green-600 hover:bg-green-700 text-white{% endif %}">
+                                {% if vendedor.ativo %}
+                                    🔒 Desativar
+                                {% else %}
+                                    🔓 Ativar
+                                {% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center">
+                            <div class="flex flex-col items-center">
+                                <span class="text-5xl mb-3">👥</span>
+                                <p class="text-gray-500">Nenhum vendedor cadastrado</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Gerenciar Lojas -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 md:px-6 py-3 md:py-4 border-b">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div>
+                    <h2 class="text-lg md:text-xl font-semibold text-gray-800">🏪 Gerenciar Lojas</h2>
+                    <p class="text-xs text-gray-500 mt-1">Ative ou desative lojas no sistema</p>
+                </div>
+                <div class="text-xs bg-gray-200 px-2 py-1 rounded">
+                    Total: {{ lojas|length }}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cards para Mobile (Lojas) -->
+        <div class="block md:hidden divide-y divide-gray-100">
+            {% for loja in lojas %}
+            <div class="p-4 hover:bg-gray-50 transition">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <div class="font-semibold text-gray-800">{{ loja.nome }}</div>
+                        <div class="text-xs text-gray-400 mt-1">ID: {{ loja.id }}</div>
+                    </div>
+                    <div class="text-right">
+                        {% if loja.ativo %}
+                            <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">✅ Ativa</span>
+                        {% else %}
+                            <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">❌ Inativa</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <a href="{{ url_for('admin.toggle_loja', loja_id=loja.id) }}" 
+                       class="inline-flex items-center justify-center w-full px-4 py-2 rounded-lg text-sm font-semibold transition shadow-sm
+                              {% if loja.ativo %}bg-red-600 hover:bg-red-700 text-white{% else %}bg-green-600 hover:bg-green-700 text-white{% endif %}">
+                        {% if loja.ativo %}
+                            🔒 Desativar Loja
+                        {% else %}
+                            🔓 Ativar Loja
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+            {% else %}
+            <div class="p-8 text-center">
+                <div class="text-5xl mb-3">🏪</div>
+                <p class="text-gray-500">Nenhuma loja cadastrada</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Tabela para Desktop (Lojas) -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome da Loja</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ação</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for loja in lojas %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 text-sm text-gray-500">#{{ loja.id }}</td>
+                        <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ loja.nome }}</td>
+                        <td class="px-6 py-4 text-sm text-center">
+                            {% if loja.ativo %}
+                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">✅ Ativa</span>
+                            {% else %}
+                                <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">❌ Inativa</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-center">
+                            <a href="{{ url_for('admin.toggle_loja', loja_id=loja.id) }}" 
+                               class="inline-flex items-center px-3 py-1 rounded-lg text-sm font-semibold transition shadow-sm
+                                      {% if loja.ativo %}bg-red-600 hover:bg-red-700 text-white{% else %}bg-green-600 hover:bg-green-700 text-white{% endif %}">
+                                {% if loja.ativo %}
+                                    🔒 Desativar
+                                {% else %}
+                                    🔓 Ativar
+                                {% endif %}
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="px-6 py-8 text-center">
+                            <div class="flex flex-col items-center">
+                                <span class="text-5xl mb-3">🏪</span>
+                                <p class="text-gray-500">Nenhuma loja cadastrada</p>
+                                <p class="text-sm text-gray-400 mt-1">Clique em "Criar Nova Loja" no menu de seleção</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Informações Adicionais -->
+    <div class="bg-blue-50 border-l-4 border-blue-400 rounded-lg p-4">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <span class="text-2xl">ℹ️</span>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-semibold text-blue-800">Informações Importantes</h3>
+                <div class="mt-1 text-sm text-blue-700">
+                    <p>• Vendedores inativos não conseguem acessar o sistema</p>
+                    <p>• Lojas inativas ficam ocultas para os vendedores</p>
+                    <p>• Apenas administradores têm acesso a este painel</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Adicionar confirmação antes de ativar/desativar
+    document.querySelectorAll('a[href*="toggle_vendedor"], a[href*="toggle_loja"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            const isActive = this.textContent.includes('Desativar') || this.textContent.includes('Desativar');
+            const tipo = this.href.includes('vendedor') ? 'vendedor' : 'loja';
+            const acao = isActive ? 'desativar' : 'ativar';
+            
+            const mensagem = `⚠️ Confirmar ${acao}ção de ${tipo}?\n\n`;
+            
+            if (confirm(mensagem)) {
+                return true;
+            } else {
+                e.preventDefault();
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %}

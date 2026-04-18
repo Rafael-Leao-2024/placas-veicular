@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#2563EB">
+    <title>{% block title %}Sistema de Fluxo de Caixa - Placas Veículos{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        .flash-message {
+            animation: fadeOut 3s ease-in-out forwards;
+        }
+        
+        /* Menu responsivo */
+        @media (max-width: 768px) {
+            .mobile-menu {
+                display: none;
+            }
+            .mobile-menu.open {
+                display: block;
+                position: fixed;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background: white;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                z-index: 50;
+                max-height: calc(100vh - 60px);
+                overflow-y: auto;
+            }
+            .mobile-menu a {
+                display: block;
+                padding: 1rem;
+                border-bottom: 1px solid #e5e7eb;
+            }
+        }
+        
+        /* Botões maiores para mobile */
+        @media (max-width: 640px) {
+            .btn-mobile-large {
+                padding: 0.75rem 1rem;
+                font-size: 1rem;
+            }
+        }
+        
+        /* Scroll suave */
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        /* Melhorar toque em elementos clicáveis */
+        button, a, [role="button"] {
+            touch-action: manipulation;
+            min-height: 44px;
+        }
+        
+        /* Loading spinner */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-100">
+    
+    {% if current_user.is_authenticated and session.get('loja_id') %}
+    <!-- Navbar Responsiva -->
+    <nav class="bg-blue-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-3">
+                <!-- Logo/Título -->
+                <div class="text-xl font-bold flex items-center space-x-2">
+                    <span class="text-2xl">🚗</span>
+                    {% if not session.get('loja_id') %}
+                    <span class="hidden sm:inline">Sistema de Fluxo de Caixa</span>
+                    <span class="sm:hidden">Fluxo Caixa</span>
+                    {% else %}
+                    <span>{{ session.get('loja_nome', 'Loja') }}</span>
+                    {% endif %}
+                </div>
+                
+                <!-- Menu Desktop -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <div class="text-sm">
+                        👤 {{ current_user.name.split()[0] }}
+                    </div>
+                    <a href="{{ url_for('dashboard') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition">📊 Painel</a>
+                    <a href="{{ url_for('vendas.nova') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition">➕ Nova Venda</a>
+                    <a href="{{ url_for('vendas.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition">📋 Vendas</a>
+                    <a href="{{ url_for('estoque.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition">📦 Estoque</a>
+                    <a href="{{ url_for('vendas.devendo') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition">💰 Devendo</a>
+                    <a href="{{ url_for('relatorios.mensal') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition">📈 Relatórios Mensal</a>
+                    {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition">⚙️ Admin</a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.logout') }}" class="bg-red-500 hover:bg-red-600 px-3 py-2 rounded transition">🚪 Sair</a>
+                </div>
+                
+                <!-- Botão Menu Mobile -->
+                <button id="menuBtn" class="md:hidden focus:outline-none">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Menu Mobile (oculto por padrão) -->
+            <div id="mobileMenu" class="mobile-menu md:hidden">
+                <div class="bg-white text-gray-800">
+                    <div class="p-4 bg-blue-50 border-b">
+                        <div class="font-semibold">{{ current_user.name }}</div>
+                        <div class="text-sm text-gray-600">{{ session.get('loja_nome', 'Loja') }}</div>
+                    </div>
+                    <a href="{{ url_for('dashboard') }}" class="flex items-center space-x-3">
+                        <span>📊</span>
+                        <span>Painel Principal</span>
+                    </a>
+                    <a href="{{ url_for('vendas.nova') }}" class="flex items-center space-x-3">
+                        <span>➕</span>
+                        <span>Nova Venda</span>
+                    </a>
+                    <a href="{{ url_for('vendas.index') }}" class="flex items-center space-x-3">
+                        <span>📋</span>
+                        <span>Lista de Vendas</span>
+                    </a>
+                    <a href="{{ url_for('estoque.index') }}" class="flex items-center space-x-3">
+                        <span>📦</span>
+                        <span>Estoque</span>
+                    </a>
+                    <a href="{{ url_for('vendas.devendo') }}" class="flex items-center space-x-3">
+                        <span>💰</span>
+                        <span>Clientes Devendo</span>
+                    </a>
+                    <a href="{{ url_for('relatorios.diario') }}" class="flex items-center space-x-3">
+                        <span>📈</span>
+                        <span>Relatório Diário</span>
+                    </a>
+                    <a href="{{ url_for('relatorios.mensal') }}" class="flex items-center space-x-3">
+                        <span>📊</span>
+                        <span>Relatório Mensal</span>
+                    </a>
+                    {% if current_user.is_admin %}
+                    <a href="{{ url_for('admin.index') }}" class="flex items-center space-x-3">
+                        <span>⚙️</span>
+                        <span>Administração</span>
+                    </a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.logout') }}" class="flex items-center space-x-3 text-red-600 border-t">
+                        <span>🚪</span>
+                        <span>Sair do Sistema</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Conteúdo Principal -->
+    <main class="container mx-auto px-4 py-4 md:py-6">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message mb-4 p-4 rounded-lg shadow-md {% if category == 'success' %}bg-green-100 text-green-700 border-l-4 border-green-500{% elif category == 'error' %}bg-red-100 text-red-700 border-l-4 border-red-500{% elif category == 'warning' %}bg-yellow-100 text-yellow-700 border-l-4 border-yellow-500{% else %}bg-blue-100 text-blue-700 border-l-4 border-blue-500{% endif %}">
+                        <div class="flex items-center">
+                            <span class="text-2xl mr-3">
+                                {% if category == 'success' %}✅
+                                {% elif category == 'error' %}❌
+                                {% elif category == 'warning' %}⚠️
+                                {% else %}ℹ️{% endif %}
+                            </span>
+                            <span>{{ message }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Conteúdo específico da página -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer Responsivo -->
+    <footer class="bg-gray-800 text-white text-center py-4 mt-8">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0">
+                <p class="text-sm">&copy; 2024 Sistema de Fluxo de Caixa - Placas de Veículos</p>
+                <p class="text-xs text-gray-400">Versão 1.0 | Desenvolvido para sua loja</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Menu mobile toggle
+        const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        if (menuBtn && mobileMenu) {
+            menuBtn.addEventListener('click', function() {
+                mobileMenu.classList.toggle('open');
+            });
+            
+            // Fechar menu ao clicar em um link
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.remove('open');
+                });
+            });
+        }
+        
+        // Fechar menu ao clicar fora (apenas em mobile)
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 768) {
+                if (menuBtn && mobileMenu && !menuBtn.contains(event.target) && !mobileMenu.contains(event.target)) {
+                    mobileMenu.classList.remove('open');
+                }
+            }
+        });
+        
+        // Adicionar classe para auto-refresh em páginas específicas
+        {% if auto_refresh %}
+        let refreshInterval = setInterval(function() {
+            location.reload();
+        }, 30000);
+        
+        // Limpar intervalo quando a página for descarregada
+        window.addEventListener('beforeunload', function() {
+            clearInterval(refreshInterval);
+        });
+        {% endif %}
+        
+        // Detectar se é dispositivo mobile
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
+        
+        // Adicionar classe no body para CSS condicional
+        if (isMobile()) {
+            document.body.classList.add('mobile-device');
+        }
+        
+        // Loading state para botões
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn && !submitBtn.disabled) {
+                    submitBtn.disabled = true;
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<span class="loading"></span> Processando...';
+                    
+                    // Restaurar após 5 segundos (caso de erro)
+                    setTimeout(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }, 5000);
+                }
+            });
+        });
+        
+        // Melhorar experiência de toque em dispositivos móveis
+        if ('ontouchstart' in window) {
+            document.body.classList.add('touch-device');
+        }
+    </script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

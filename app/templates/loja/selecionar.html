@@ -1,0 +1,61 @@
+{% extends "base.html" %} {% block title %}Selecionar Loja{% endblock %} {%
+block content %}
+<div class="min-h-screen flex items-center justify-center">
+  <div class="bg-white rounded-lg shadow-lg p-8 max-w-4xl w-full">
+    <h1 class="text-2xl font-bold mb-6 text-center">Selecionar Loja</h1>
+
+    <div class="grid md:grid-cols-2 gap-8">
+      <div>
+        <h2 class="text-xl font-semibold mb-4">Suas Lojas</h2>
+        {% if lojas %}
+        <div class="space-y-3">
+          {% for loja in lojas %}
+          <form method="POST" class="inline-block w-full">
+            <input type="hidden" name="action" value="selecionar" />
+            <input type="hidden" name="loja_id" value="{{ loja.id }}" />
+            <button
+              type="submit"
+              class="w-full text-left bg-gray-50 hover:bg-blue-50 border border-gray-200 rounded-lg p-4 transition"
+            >
+              <div class="font-semibold text-lg">{{ loja.nome }}</div>
+              <div class="text-sm text-gray-600">
+                Clique para selecionar esta loja
+              </div>
+            </button>
+          </form>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-500">
+          Você não está associado a nenhuma loja ainda.
+        </p>
+        {% endif %}
+      </div>
+
+      {% if current_user %}
+      <div>
+        <h2 class="text-xl font-semibold mb-4">Criar Nova Loja</h2>
+        <form method="POST">
+          <input type="hidden" name="action" value="criar" />
+          <div class="mb-4">
+            <label class="block text-gray-700 mb-2">Nome da Loja</label>
+            <input
+              type="text"
+              name="nome_loja"
+              required
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500"
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition"
+          >
+            Criar Nova Loja
+          </button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

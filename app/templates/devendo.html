@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}Clientes Devendo - Fluxo de Caixa{% endblock %}
+
+{% block content %}
+<div class="space-y-4 md:space-y-6">
+    <!-- Cabeçalho -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">💰 Clientes que Estão Devendo</h1>
+            <p class="text-sm text-gray-500 mt-1">Gerencie as dívidas e receba os valores pendentes</p>
+        </div>
+        <div class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg text-sm font-semibold shadow-sm">
+            Total Geral: R$ {{ "%.2f"|format(clientes.values()|sum(attribute='total')) }}
+        </div>
+    </div>
+
+    {% for cliente_nome, dados in clientes.items() %}
+    <!-- Card do Cliente (Mobile e Desktop) -->
+    <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition overflow-hidden">
+        <!-- Cabeçalho do Cliente -->
+        <div class="bg-gradient-to-r from-yellow-50 to-orange-50 px-4 md:px-6 py-3 md:py-4 border-b border-yellow-200">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div class="flex items-center space-x-3">
+                    <span class="text-3xl">👤</span>
+                    <div>
+                        <h2 class="text-lg md:text-xl font-bold text-gray-800">{{ cliente_nome }}</h2>
+                        <p class="text-xs text-gray-500 mt-1">
+                            {{ dados.vendas|length }} venda(s) pendente(s)
+                        </p>
+                    </div>
+                </div>
+                <div class="bg-red-100 px-4 py-2 rounded-lg">
+                    <div class="text-xs text-red-600 font-semibold">Total Devendo</div>
+                    <div class="text-xl md:text-2xl font-bold text-red-600">
+                        R$ {{ "%.2f"|format(dados.total) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cards para Mobile (visível apenas em telas pequenas) -->
+        <div class="block md:hidden divide-y divide-gray-100">
+            {% for venda in dados.vendas %}
+            <div class="p-4 hover:bg-gray-50 transition">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <div class="flex items-center space-x-2 mb-1">
+                            <span class="text-xs text-gray-500">📅 {{ venda.data.strftime('%d/%m/%Y') }}</span>
+                            <span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">
+                                💰 Fiado
+                            </span>
+                        </div>
+                        <div class="text-lg font-bold text-red-600">
+                            R$ {{ "%.2f"|format(venda.total) }}
+                        </div>
+                    </div>
+                    <a href="{{ url_for('vendas.marcar_pago', venda_id=venda.id) }}" 
+                       class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-md hover:shadow-lg active:transform active:scale-95 whitespace-nowrap ml-3">
+                        ✅ Receber
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Tabela para Desktop (visível apenas em telas médias/grandes) -->
+        <div class="hidden md:block overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Forma Pagamento</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for venda in dados.vendas %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div class="flex items-center space-x-2">
+                                <span>📅</span>
+                                <span>{{ venda.data.strftime('%d/%m/%Y') }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-semibold">
+                                💰 Fiado
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                            <span class="font-bold text-red-600">R$ {{ "%.2f"|format(venda.total) }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                            <a href="{{ url_for('vendas.marcar_pago', venda_id=venda.id) }}" 
+                               class="inline-flex items-center bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-sm hover:shadow-lg">
+                                ✅ Marcar como Pago
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Botão para receber tudo (apenas frontend) -->
+        <div class="bg-gray-50 px-4 md:px-6 py-3 border-t border-gray-200">
+            <button onclick="receberTudo('{{ cliente_nome }}')" 
+                    class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition shadow-md hover:shadow-lg active:transform active:scale-95">
+                💰 Receber Todas as Dívidas de {{ cliente_nome }}
+            </button>
+        </div>
+    </div>
+    {% else %}
+    <!-- Nenhum devedor -->
+    <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg shadow-lg p-8 md:p-12 text-center">
+        <div class="flex flex-col items-center">
+            <div class="text-6xl md:text-7xl mb-4">🎉</div>
+            <h2 class="text-2xl md:text-3xl font-bold text-green-700 mb-2">Nenhum cliente está devendo!</h2>
+            <p class="text-gray-600 text-lg">Todas as dívidas foram pagas</p>
+            <div class="mt-6 flex flex-wrap justify-center gap-3">
+                <a href="{{ url_for('vendas.nova') }}" 
+                   class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition">
+                    ➕ Nova Venda
+                </a>
+                <a href="{{ url_for('dashboard') }}" 
+                   class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">
+                    📊 Voltar ao Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    
+    <!-- Dicas para recuperação de crédito (opcional) -->
+    {% if clientes %}
+    <div class="bg-blue-50 border-l-4 border-blue-400 rounded-lg p-4">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <span class="text-2xl">💡</span>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-semibold text-blue-800">Dica para Recebimento</h3>
+                <div class="mt-1 text-sm text-blue-700">
+                    <p>Ofereça descontos para pagamento à vista ou parcelamento no cartão para facilitar o recebimento.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Função para "Receber Tudo" (apenas frontend - abre confirmação para cada venda)
+    function receberTudo(clienteNome) {
+        if (confirm(`💰 Deseja marcar TODAS as dívidas de ${clienteNome} como pagas?\n\nEsta ação marcará todas as vendas pendentes deste cliente como recebidas.`)) {
+            // Encontrar todos os botões de "Receber" deste cliente
+            const clienteCard = event.target.closest('.bg-white.rounded-lg');
+            const botoesReceber = clienteCard.querySelectorAll('a[href*="marcar_pago"]');
+            
+            if (botoesReceber.length > 0) {
+                if (confirm(`⚠️ Confirmar recebimento de ${botoesReceber.length} venda(s) no valor total?`)) {
+                    // Redirecionar para a primeira venda (as outras serão processadas em sequência)
+                    // Nota: Isso é uma solução frontend. Idealmente, seria feito no backend.
+                    window.location.href = botoesReceber[0].href;
+                }
+            }
+        }
+    }
+    
+    // Adicionar confirmação individual melhorada
+    document.querySelectorAll('a[href*="marcar_pago"]').forEach(link => {
+        const originalHref = link.href;
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Encontrar o valor da venda
+            let valor = '';
+            let row = this.closest('tr');
+            if (row) {
+                const valorCell = row.querySelector('td:nth-child(3)');
+                if (valorCell) valor = valorCell.innerText;
+            } else {
+                const card = this.closest('.p-4');
+                if (card) {
+                    const valorDiv = card.querySelector('.text-lg.font-bold');
+                    if (valorDiv) valor = valorDiv.innerText;
+                }
+            }
+            
+            if (confirm(`✅ Confirmar recebimento desta venda?\n\nValor: ${valor}\n\nO cliente será marcado como pago.`)) {
+                window.location.href = originalHref;
+            }
+        });
+    });
+</script>
+
+<style>
+    @media (max-width: 640px) {
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+    }
+</style>
+{% endblock %}

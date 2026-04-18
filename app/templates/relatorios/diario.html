@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório Diário - Fluxo de Caixa{% endblock %}
+
+{% block content %}
+<div class="space-y-4 md:space-y-6">
+    <!-- Cabeçalho -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-800">📊 Relatório Diário</h1>
+            <p class="text-sm text-gray-500 mt-1">Acompanhe as vendas e recebimentos do dia</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ url_for('relatorios.exportar_diario', data=data) }}" 
+               class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition shadow-md hover:shadow-lg active:transform active:scale-95 inline-flex items-center">
+                📥 Exportar CSV
+            </a>
+            <a href="{{ url_for('dashboard') }}" 
+               class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition shadow-md hover:shadow-lg active:transform active:scale-95 inline-flex items-center">
+                ← Voltar
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filtro de Data Melhorado -->
+    <div class="bg-white rounded-lg shadow-md p-4">
+        <form method="GET" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <label class="font-semibold text-gray-700">📅 Selecione a Data:</label>
+            <input type="date" name="data" value="{{ data }}" 
+                   class="flex-1 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+            <button type="submit" 
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition shadow-md hover:shadow-lg active:transform active:scale-95">
+                🔍 Filtrar
+            </button>
+        </form>
+    </div>
+    
+    <!-- Cards de Resumo (Melhorados) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg shadow-md p-4 md:p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-gray-600 text-sm mb-1">💰 Total de Vendas</div>
+                    <div class="text-2xl md:text-3xl font-bold text-blue-600">R$ {{ "%.2f"|format(total_vendas|default(0)) }}</div>
+                </div>
+                <div class="text-4xl">💰</div>
+            </div>
+            <div class="text-xs text-gray-500 mt-2">Valor total em vendas no dia</div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg shadow-md p-4 md:p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-gray-600 text-sm mb-1">✅ Total Recebido</div>
+                    <div class="text-2xl md:text-3xl font-bold text-green-600">R$ {{ "%.2f"|format(total_recebido|default(0)) }}</div>
+                </div>
+                <div class="text-4xl">✅</div>
+            </div>
+            <div class="text-xs text-gray-500 mt-2">Vendas pagas no dia</div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-red-50 to-red-100 rounded-lg shadow-md p-4 md:p-6 hover:shadow-lg transition">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-gray-600 text-sm mb-1">⏳ Total a Receber</div>
+                    <div class="text-2xl md:text-3xl font-bold text-red-600">R$ {{ "%.2f"|format(total_devendo|default(0)) }}</div>
+                </div>
+                <div class="text-4xl">⏳</div>
+            </div>
+            <div class="text-xs text-gray-500 mt-2">Vendas pendentes (fiado)</div>
+        </div>
+    </div>
+    
+    <!-- Cards para Mobile (Lista de Vendas) -->
+    <div class="block md:hidden space-y-3">
+        <div class="bg-white rounded-lg shadow-md p-4">
+            <h2 class="text-lg font-bold text-gray-800 mb-3">📋 Vendas do Dia</h2>
+            {% if vendas %}
+                {% for venda in vendas %}
+                <div class="border-b border-gray-100 last:border-0 py-3">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <div class="font-semibold text-gray-800">{{ venda.cliente_nome }}</div>
+                            <div class="text-xs text-gray-500">{{ venda.vendedor.user.name }}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-blue-600">R$ {{ "%.2f"|format(venda.total) }}</div>
+                            <div class="text-xs">
+                                {% if venda.pago %}
+                                    <span class="text-green-600">✅ Pago</span>
+                                {% else %}
+                                    <span class="text-red-600">⏳ Pendente</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="px-2 py-1 rounded text-xs
+                            {% if venda.forma_pagamento == 'fiado' %}bg-yellow-100 text-yellow-800
+                            {% elif venda.forma_pagamento == 'dinheiro' %}bg-green-100 text-green-800
+                            {% elif venda.forma_pagamento == 'pix' %}bg-blue-100 text-blue-800
+                            {% else %}bg-purple-100 text-purple-800{% endif %}">
+                            {% if venda.forma_pagamento == 'fiado' %}💰 Fiado
+                            {% elif venda.forma_pagamento == 'dinheiro' %}💵 Dinheiro
+                            {% elif venda.forma_pagamento == 'pix' %}📱 PIX
+                            {% else %}💳 Cartão{% endif %}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-8">
+                    <div class="text-5xl mb-3">📭</div>
+                    <p class="text-gray-500">Nenhuma venda registrada neste dia</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Tabela para Desktop (Lista de Vendas) -->
+    <div class="hidden md:block bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gray-50 px-6 py-4 border-b">
+            <h2 class="text-xl font-semibold text-gray-800">📋 Vendas do Dia</h2>
+            <p class="text-sm text-gray-500 mt-1">{{ vendas|length }} venda(s) registrada(s)</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendedor</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pagamento</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for venda in vendas %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 text-sm text-gray-900 font-medium">{{ venda.cliente_nome }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ venda.vendedor.user.name }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900 text-right font-bold">R$ {{ "%.2f"|format(venda.total) }}</td>
+                        <td class="px-6 py-4 text-sm">
+                            <span class="px-2 py-1 rounded-full text-xs font-semibold
+                                {% if venda.forma_pagamento == 'fiado' %}bg-yellow-100 text-yellow-800
+                                {% elif venda.forma_pagamento == 'dinheiro' %}bg-green-100 text-green-800
+                                {% elif venda.forma_pagamento == 'pix' %}bg-blue-100 text-blue-800
+                                {% else %}bg-purple-100 text-purple-800{% endif %}">
+                                {% if venda.forma_pagamento == 'fiado' %}💰 Fiado
+                                {% elif venda.forma_pagamento == 'dinheiro' %}💵 Dinheiro
+                                {% elif venda.forma_pagamento == 'pix' %}📱 PIX
+                                {% else %}💳 Cartão{% endif %}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm">
+                            {% if venda.pago %}
+                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">✅ Pago</span>
+                            {% else %}
+                                <span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-semibold">⏳ Pendente</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <span class="text-5xl mb-3">📭</span>
+                                <p class="text-gray-500 font-medium">Nenhuma venda registrada neste dia</p>
+                                <p class="text-sm text-gray-400 mt-1">Selecione outra data ou registre uma nova venda</p>
+                                <a href="{{ url_for('vendas.nova') }}" class="mt-3 bg-green-600 text-white px-4 py-2 rounded-lg text-sm">
+                                    ➕ Nova Venda
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- Informações adicionais (quando tem vendas) -->
+    {% if vendas %}
+    <div class="bg-blue-50 border-l-4 border-blue-400 rounded-lg p-4">
+        <div class="flex items-start">
+            <div class="flex-shrink-0">
+                <span class="text-2xl">💡</span>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-semibold text-blue-800">Informações do Relatório</h3>
+                <div class="mt-1 text-sm text-blue-700">
+                    <p>• Total de vendas: <strong>{{ vendas|length }}</strong> transações</p>
+                    <p>• Ticket médio: <strong>R$ {{ "%.2f"|format(total_vendas / vendas|length if vendas|length > 0 else 0) }}</strong></p>
+                    <p>• Taxa de pagamento: <strong>{{ "%.1f"|format((total_recebido / total_vendas * 100) if total_vendas > 0 else 0) }}%</strong> das vendas foram pagas</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Auto-refresh report every 30 seconds (apenas se não houver filtro personalizado)
+    let refreshInterval;
+    
+    function startAutoRefresh() {
+        refreshInterval = setInterval(function() {
+            // Mostrar indicador de recarregamento
+            showRefreshIndicator();
+            location.reload();
+        }, 30000);
+    }
+    
+    function showRefreshIndicator() {
+        let indicator = document.createElement('div');
+        indicator.innerHTML = '🔄 Atualizando relatório...';
+        indicator.style.position = 'fixed';
+        indicator.style.bottom = '20px';
+        indicator.style.right = '20px';
+        indicator.style.backgroundColor = '#3B82F6';
+        indicator.style.color = 'white';
+        indicator.style.padding = '8px 16px';
+        indicator.style.borderRadius = '8px';
+        indicator.style.fontSize = '12px';
+        indicator.style.zIndex = '9999';
+        indicator.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+        document.body.appendChild(indicator);
+        
+        setTimeout(() => {
+            indicator.remove();
+        }, 2000);
+    }
+    
+    // Iniciar auto-refresh
+    startAutoRefresh();
+    
+    // Limpar intervalo quando a página for descarregada
+    window.addEventListener('beforeunload', function() {
+        if (refreshInterval) {
+            clearInterval(refreshInterval);
+        }
+    });
+    
+    // Formatar data para exibição
+    const dataInput = document.querySelector('input[type="date"]');
+    if (dataInput && !dataInput.value) {
+        const hoje = new Date().toISOString().split('T')[0];
+        dataInput.value = hoje;
+    }
+</script>
+{% endblock %}

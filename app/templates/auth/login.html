@@ -1,0 +1,29 @@
+{% extends "base.html" %} {% block title %}Login - Sistema de Fluxo de Caixa{%
+endblock %} {% block content %}
+<div class="min-h-screen flex items-center justify-center">
+  <div class="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-800">🚗 Fluxo de Caixa</h1>
+      <p class="text-gray-600 mt-2">Sistema para Loja de Placas de Veículos</p>
+    </div>
+
+    <div class="text-center">
+      <a
+        href="{{ google_auth_url }}"
+        class="inline-flex items-center justify-center bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-300 w-full"
+      >
+        <svg class="w-6 h-6 mr-2" fill="currentColor" viewBox="0 0 24 24">
+          <path
+            d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"
+          />
+        </svg>
+        Entrar com Google
+      </a>
+    </div>
+
+    <div class="mt-6 text-center text-sm text-gray-600">
+      <p>Faça login com sua conta Google para acessar o sistema</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

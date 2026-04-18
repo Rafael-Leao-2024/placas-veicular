@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Nova Venda - Fluxo de Caixa{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 sm:px-0">
+    <div class="bg-white rounded-lg shadow-md p-4 md:p-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-800">➕ Nova Venda</h1>
+                <p class="text-sm text-gray-500 mt-1">Registre uma nova transação</p>
+            </div>
+            <div class="text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full">
+                📋 Preencha todos os campos
+            </div>
+        </div>
+
+        <form id="vendaForm" method="POST">
+            <div class="space-y-6">
+                <!-- Dados da Venda -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">
+                            👤 Nome do Cliente <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" name="cliente_nome" required
+                               placeholder="Digite o nome do cliente"
+                               class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                    </div>
+
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-2">
+                            💳 Forma de Pagamento <span class="text-red-500">*</span>
+                        </label>
+                        <select name="forma_pagamento" required
+                                class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition">
+                            <option value="dinheiro">💵 Dinheiro</option>
+                            <option value="pix">📱 PIX</option>
+                            <option value="cartao">💳 Cartão</option>
+                            <option value="fiado">💰 Fiado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Itens da Venda -->
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-3">
+                        📦 Produtos
+                    </label>
+                    
+                    <div id="produtosContainer" class="space-y-3">
+                        <div class="produto-item bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Produto</label>
+                                    <select name="produto_id[]" class="produto-select w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500" required>
+                                        <option value="">Selecione um produto</option>
+                                        {% for produto in produtos %}
+                                        <option value="{{ produto.id }}" 
+                                                data-preco="{{ produto.preco_venda }}" 
+                                                data-estoque="{{ produto.estoque_atual }}"
+                                                data-descricao="{{ produto.descricao }}">
+                                            {{ produto.descricao }} (Estoque: {{ produto.estoque_atual }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Quantidade</label>
+                                    <input type="number" name="quantidade[]" placeholder="Quantidade" 
+                                           class="quantidade w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-500"
+                                           required min="1" value="1">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Subtotal</label>
+                                    <input type="text" name="subtotal[]" placeholder="R$ 0,00" 
+                                           class="subtotal w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-100 cursor-not-allowed"
+                                           >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total -->
+                <div class="border-t pt-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-end sm:items-center gap-3">
+                        <div class="text-sm text-gray-500">
+                            Total de itens: <span id="totalItens" class="font-semibold">0</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xl font-bold text-gray-700">Total da Venda: </span>
+                            <span id="totalVenda" class="text-3xl font-bold text-blue-600">R$ 0,00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <input type="hidden" name="produtos" id="produtosJson">
+
+                <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
+                    <button type="submit" 
+                            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md hover:shadow-lg active:transform active:scale-95">
+                        💾 Salvar Venda
+                    </button>
+                    <a href="{{ url_for('vendas.index') }}" 
+                       class="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition text-center shadow-md hover:shadow-lg active:transform active:scale-95">
+                        ❌ Cancelar
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Função para calcular o total da venda
+    function calcularTotal() {
+        let total = 0;
+        let totalItens = 0;
+        
+        document.querySelectorAll(".produto-item").forEach((item) => {
+            const subtotal = item.querySelector(".subtotal").value;
+            const quantidade = item.querySelector(".quantidade").value;
+            
+            if (subtotal && subtotal > 0) {
+                total += parseFloat(subtotal);
+                totalItens += parseInt(quantidade) || 0;
+            }
+        });
+        
+        document.getElementById("totalVenda").innerHTML = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        document.getElementById("totalItens").innerText = totalItens;
+    }
+
+    // Função para atualizar o subtotal de um item
+    function atualizarSubtotal(element) {
+        const item = element.closest(".produto-item");
+        const select = item.querySelector(".produto-select");
+        const quantidade = item.querySelector(".quantidade").value;
+        
+        if (select.value && quantidade && quantidade > 0) {
+            const preco = parseFloat(select.options[select.selectedIndex].dataset.preco);
+            const estoque = parseInt(select.options[select.selectedIndex].dataset.estoque);
+            const quantidadeNum = parseInt(quantidade);
+            
+            // Validar estoque
+            if (quantidadeNum > estoque) {
+                alert(`⚠️ Estoque insuficiente!\n\nProduto: ${select.options[select.selectedIndex].dataset.descricao}\nEstoque disponível: ${estoque}\nQuantidade solicitada: ${quantidadeNum}`);
+                item.querySelector(".quantidade").value = estoque;
+                atualizarSubtotal(element);
+                return;
+            }
+            
+            const subtotal = preco * quantidadeNum;
+            item.querySelector(".subtotal").value = subtotal.toFixed(2);
+            calcularTotal();
+        } else {
+            item.querySelector(".subtotal").value = "";
+            calcularTotal();
+        }
+    }
+
+    // Inicializar event listeners para os produtos existentes
+    document.querySelectorAll(".produto-select, .quantidade").forEach((el) => {
+        el.addEventListener("change", function() { atualizarSubtotal(this); });
+        el.addEventListener("input", function() { atualizarSubtotal(this); });
+    });
+
+    // Validação do formulário antes de enviar
+    document.getElementById("vendaForm").addEventListener("submit", function(e) {
+        const produtos = [];
+        let hasError = false;
+        
+        document.querySelectorAll(".produto-item").forEach((item) => {
+            const produtoId = item.querySelector(".produto-select").value;
+            const quantidade = item.querySelector(".quantidade").value;
+            const subtotal = item.querySelector(".subtotal").value;
+            
+            if (!produtoId) {
+                alert("⚠️ Selecione um produto!");
+                hasError = true;
+                return;
+            }
+            
+            if (!quantidade || quantidade <= 0) {
+                alert("⚠️ Informe uma quantidade válida!");
+                hasError = true;
+                return;
+            }
+            
+            if (produtoId && quantidade) {
+                produtos.push({
+                    produto_id: parseInt(produtoId),
+                    quantidade: parseInt(quantidade),
+                    total: parseFloat(subtotal)
+                });
+            }
+        });
+        
+        if (hasError) {
+            e.preventDefault();
+            return;
+        }
+        
+        if (produtos.length === 0) {
+            alert("⚠️ Adicione pelo menos um produto à venda!");
+            e.preventDefault();
+            return;
+        }
+        
+        const clienteNome = document.querySelector("input[name='cliente_nome']").value;
+        if (!clienteNome.trim()) {
+            alert("⚠️ Digite o nome do cliente!");
+            e.preventDefault();
+            return;
+        }
+        
+        document.getElementById("produtosJson").value = JSON.stringify(produtos);
+        
+        // Mostrar loading
+        const submitBtn = this.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span> Salvando...';
+    });
+    
+    // Inicializar cálculo
+    calcularTotal();
+</script>
+
+<style>
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    .animate-spin {
+        animation: spin 1s linear infinite;
+        display: inline-block;
+    }
+</style>
+{% endblock %}
