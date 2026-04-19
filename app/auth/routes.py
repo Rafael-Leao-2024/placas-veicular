@@ -19,7 +19,7 @@ def login():
 
     # Build Google OAuth URL
     google_auth_url = f"https://accounts.google.com/o/oauth2/v2/auth?client_id={Config.GOOGLE_CLIENT_ID}&redirect_uri={url_for('auth.callback', _external=True)}&response_type=code&scope=openid email profile"
-
+    print(url_for('auth.callback', _external=True))
     return render_template("auth/login.html", google_auth_url=google_auth_url)
 
 
