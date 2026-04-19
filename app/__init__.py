@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, current_user
 from config import Config
+from werkzeug.middleware.proxy_fix import ProxyFix
+
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -10,6 +12,7 @@ login_manager = LoginManager()
 
 def create_app(config_class=Config):
     app = Flask(__name__)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
     app.config.from_object(config_class)
     
     db.init_app(app)
