@@ -68,5 +68,5 @@ def selecionar():
                 return redirect(url_for('dashboard'))
     
     if current_user.is_admin:
-        lojas_disponiveis = Loja.query.filter_by(ativo=True).all()  
+        lojas_disponiveis = Loja.query.filter_by(ativo=True).join(Vendedor).filter(Vendedor.user_id == current_user.id).all()
     return render_template('loja/selecionar.html', lojas=lojas_disponiveis)

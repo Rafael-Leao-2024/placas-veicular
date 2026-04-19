@@ -12,9 +12,9 @@
         <div class="bg-white rounded-lg shadow p-4 md:p-6 hover:shadow-lg transition">
             <div class="text-gray-600 text-sm mb-2">💰 Total de Vendas Hoje</div>
             <div class="text-2xl md:text-3xl font-bold text-blue-600">
-                R$ {{ "%.2f"|format(total_vendas|default(0)) }}
+                {{ total_vendas|default(0) }}
             </div>
-            <div class="text-xs text-gray-500 mt-2">Valor total em vendas</div>
+            <div class="text-xs text-gray-500 mt-2">Quantidade de vendas</div>
         </div>
         
         <!-- Card Total Recebido -->

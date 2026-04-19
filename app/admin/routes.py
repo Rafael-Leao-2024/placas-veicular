@@ -16,7 +16,7 @@ def index():
         return redirect(url_for("dashboard"))
     
     vendedores = Vendedor.query.join(User).filter(User.id == Vendedor.user_id).all()
-    lojas = Loja.query.all()
+    lojas = Loja.query.filter_by(ativo=True).join(Vendedor).filter(Vendedor.user_id == current_user.id).all()  
 
     return render_template("admin/index.html", vendedores=vendedores, lojas=lojas)
 
