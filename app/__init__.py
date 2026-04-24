@@ -70,7 +70,9 @@ def create_app(config_class=Config):
         # pegar vendas do dia do usuario logado e do loja do usuario logado
         
         vendas = Venda.query.filter_by(loja_id=loja_id).filter(Venda.data == today).all()
+        print(vendas)
         vendas = [venda for venda in vendas if venda.ativo == True]
+        print(vendas)
 
         total_vendas = len(vendas)
         total_recebido = sum(venda.total for venda in vendas if venda.pago == True)
@@ -79,7 +81,8 @@ def create_app(config_class=Config):
         return render_template('dashboard.html',
                              total_vendas=total_vendas,
                              total_recebido=total_recebido,
-                             total_devendo=total_devendo)
+                             total_devendo=total_devendo,
+                             )
     
     @login_manager.user_loader
     def load_user(id):
