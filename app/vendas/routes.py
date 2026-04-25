@@ -113,7 +113,10 @@ def excluir(venda_id):
     
     venda = Venda.query.get_or_404(venda_id)
     
-    if venda.loja_id != int(loja_id):
+    print("excluindo", venda.vendedor_id, [vendedor.id for vendedor in current_user.vendedores])
+
+    if venda.vendedor_id not in [vendedor.id for vendedor in current_user.vendedores]:
+        print(venda.vendedor_id, [vendedor.id for vendedor in current_user.vendedores])
         flash('Você não tem permissão para excluir esta venda.', 'error')
         return redirect(url_for('vendas.index'))
     
@@ -174,10 +177,35 @@ def editar(venda_id):
     if venda.data != date.today():
         flash('Só é permitido editar vendas do dia.', 'error')
         return redirect(url_for('vendas.index'))
+ 
     
     if request.method == 'POST':
+
+        # dever o estoque do produto do primeiro item da venda
+        produto = Produto.query.get(venda.itens[0].produto_id)
+        produto.estoque_atual += venda.itens[0].quantidade
+
+        nova_quantidade = int(request.form.get('quantidade'))
+        novo_produto_id = request.form.get('produto_id')
+    
+        produto_novo = Produto.query.get(novo_produto_id)
+        if produto_novo.estoque_atual < nova_quantidade:
+            flash(f'Estoque insuficiente para o produto {produto_novo.descricao}.', 'error')
+            return redirect(url_for('vendas.editar', venda_id=venda_id))
+        
+        # atualizar o item da venda
+        item_venda = ItemVenda.query.filter_by(venda_id=venda.id).first()
+        item_venda.produto_id = novo_produto_id
+        item_venda.quantidade = nova_quantidade
+        item_venda.preco_unitario = produto_novo.preco_venda
+        item_venda.total_item = nova_quantidade * produto_novo.preco_venda
+        # atualizar o estoque do novo produto
+        produto_novo.estoque_atual -= nova_quantidade
+        db.session.commit()
+
         cliente_nome = request.form.get('cliente_nome')
         forma_pagamento = request.form.get('forma_pagamento')
+
         total_venda = float(request.form.get('total'))
         
         venda.cliente_nome = cliente_nome

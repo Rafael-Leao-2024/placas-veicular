@@ -31,7 +31,7 @@
                     <div id="produtosContainer" class="space-y-3">
                         {% for item in venda.itens %}
                         <div class="produto-item grid grid-cols-3 gap-3">
-                            <select name="produto_id[]" class="produto-select border rounded px-3 py-2" required>
+                            <select name="produto_id" class="produto-select border rounded px-3 py-2" required>
                                 <option value="">Selecione</option>
                                 {% for produto in produtos %}
                                 <option value="{{ produto.id }}" data-preco="{{ produto.preco_venda }}" data-estoque="{{ produto.estoque_atual }}"
