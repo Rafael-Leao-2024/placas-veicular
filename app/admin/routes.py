@@ -55,28 +55,4 @@ def toggle_loja(loja_id):
     return redirect(url_for("admin.index"))
 
 
-# webhook
-from flask import request, jsonify
-
-
-@admin_bp.route('/webhook-infinitepay', methods=['POST'])
-def webhook_infinitepay():
-    try:
-        data = request.get_json()
-
-        if not data:
-            return jsonify({"erro": "Nenhum dado recebido"}), 400
-
-        # Mostrando tudo que chegou (útil para testes)
-        print("\n=== ✅ WEBHOOK INFINITEPAY RECEBIDO ===")
-        print(data)
-        return jsonify({
-            "status": "ok",
-            "message": "Webhook recebido com sucesso",
-        }), 200
-
-    except Exception as e:
-        print("Erro ao processar webhook:", str(e))
-        return jsonify({"erro": "Erro interno no servidor"}), 500
-
 
