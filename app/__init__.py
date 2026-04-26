@@ -77,7 +77,6 @@ def create_app(config_class=Config):
         )
         vendas = [venda for venda in vendas if venda.ativo == True]
         print(today)
-        print(vendas[0].data.date())
 
         total_vendas = len(vendas)
         total_recebido = sum(venda.total for venda in vendas if venda.pago == True)
