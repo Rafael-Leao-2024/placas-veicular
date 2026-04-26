@@ -174,7 +174,7 @@ def editar(venda_id):
         flash('Você não tem permissão para editar esta venda.', 'error')
         return redirect(url_for('vendas.index'))
     
-    if venda.data != date.today():
+    if venda.data.date() != date.today():
         flash('Só é permitido editar vendas do dia.', 'error')
         return redirect(url_for('vendas.index'))
  
