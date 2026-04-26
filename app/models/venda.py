@@ -8,7 +8,7 @@ class Venda(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     loja_id = db.Column(db.Integer, db.ForeignKey("lojas.id"), nullable=False)
     vendedor_id = db.Column(db.Integer, db.ForeignKey("vendedores.id"), nullable=False)
-    data = db.Column(db.Date, default=datetime.now().date)
+    data = db.Column(db.DateTime, default=datetime.utcnow)
     cliente_nome = db.Column(db.String(255), nullable=False)
     pago = db.Column(db.Boolean, default=False)
     forma_pagamento = db.Column(
