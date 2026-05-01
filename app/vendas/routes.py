@@ -7,6 +7,7 @@ from app.models.produto import Produto
 from app.models.vendedor import Vendedor
 from datetime import date, datetime
 
+
 vendas_bp = Blueprint('vendas', __name__)
 
 @vendas_bp.route('/')
@@ -17,6 +18,7 @@ def index():
         return redirect(url_for('loja.selecionar'))
     
     vendas = Venda.query.filter_by(loja_id=loja_id, ativo=True).order_by(Venda.data.desc()).all()[:100]
+    print('{} vendo as vendas'.format(current_user.name))
     return render_template('vendas/index.html', vendas=vendas)
 
 @vendas_bp.route('/nova', methods=['GET', 'POST'])
@@ -78,6 +80,7 @@ def nova():
             produto.estoque_atual -= item['quantidade']
         
         db.session.commit()
+        print(f"venda crianda por {current_user.name} para cliente {venda.cliente_nome} valor {venda.total}")
         flash('Venda registrada com sucesso!', 'success')
         return redirect(url_for('vendas.index'))
     
@@ -102,6 +105,7 @@ def marcar_pago(venda_id):
     db.session.commit()
     
     flash('Venda marcada como paga com sucesso!', 'success')
+    print(f'{current_user.name} marcou pago a venda de {venda.cliente_nome} no valor de {venda.total}')
     return redirect(url_for('vendas.index'))
 
 @vendas_bp.route('/<int:venda_id>/excluir')
@@ -113,7 +117,7 @@ def excluir(venda_id):
     
     venda = Venda.query.get_or_404(venda_id)
     
-    print("excluindo", venda.vendedor_id, [vendedor.id for vendedor in current_user.vendedores])
+    print(f"{current_user.name}", "excluindo", venda.cliente_nome, venda.total)
 
     if venda.vendedor_id not in [vendedor.id for vendedor in current_user.vendedores]:
         print(venda.vendedor_id, [vendedor.id for vendedor in current_user.vendedores])
@@ -157,6 +161,7 @@ def devendo():
         clientes[venda.cliente_nome]['total'] += venda.total
         clientes[venda.cliente_nome]['vendas'].append(venda)
     
+    print('pagina de devedores sendo vista por {}'.format(current_user.name))
     return render_template('devendo.html', clientes=clientes)
 
 
@@ -216,6 +221,7 @@ def editar(venda_id):
 
         db.session.commit()
         flash('Venda atualizada com sucesso!', 'success')
+        print(f"{current_user.name} editou a venda de {venda.cliente_nome}")
         return redirect(url_for('vendas.index'))
     produtos = Produto.query.filter_by(loja_id=loja_id, ativo=True).all()
     produtos_disponiveis = [produto for produto in produtos if produto.estoque_atual > 0] 

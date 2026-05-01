@@ -89,6 +89,7 @@ def create_app(config_class=Config):
             and venda.pago == False
         )
 
+        print('{} vendo a pagina de dashboard'.format(current_user.name))
         return render_template(
             "dashboard.html",
             total_vendas=total_vendas,

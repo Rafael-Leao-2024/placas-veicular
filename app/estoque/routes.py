@@ -15,6 +15,7 @@ def index():
         return redirect(url_for('loja.selecionar'))
     
     produtos = Produto.query.filter_by(loja_id=loja_id, ativo=True).all()
+    print('{} vendo o estoque'.format(current_user.name))
     return render_template('estoque/index.html', produtos=produtos)
 
 @estoque_bp.route('/novo', methods=['GET', 'POST'])
@@ -43,6 +44,7 @@ def novo():
         db.session.add(produto)
         db.session.commit()
         
+        print(f"Produto Criado {produto.descricao} por {current_user.name}")
         flash('Produto cadastrado com sucesso!', 'success')
         return redirect(url_for('estoque.index'))
     
@@ -69,9 +71,11 @@ def editar(produto_id):
         # Manual stock adjustment
         novo_estoque = int(request.form.get('estoque_atual'))
         if novo_estoque != produto.estoque_atual:
+            antigo = produto.estoque_atual
             produto.estoque_atual = novo_estoque
         
         db.session.commit()
+        print(f"{current_user.name} Produto {produto.descricao} editado valor antigo {antigo} por {novo_estoque}")
         flash('Produto atualizado com sucesso!', 'success')
         return redirect(url_for('estoque.index'))
     
@@ -97,11 +101,11 @@ def excluir(produto_id):
     ).first()
     
     if has_sales:
-        print(has_sales, produto.estoque_atual)
         flash('Não é possível excluir produto com vendas associadas ou estoque não zerado.', 'error')
     else:
         produto.ativo = False
         db.session.commit()
+        print(f"{current_user.name} excluiu o {produto.descricao}")
         flash('Produto excluído com sucesso!', 'success')
     
     return redirect(url_for('estoque.index'))
