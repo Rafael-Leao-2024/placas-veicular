@@ -5,6 +5,7 @@ from flask_login import LoginManager, current_user
 from config import Config
 from werkzeug.middleware.proxy_fix import ProxyFix
 from sqlalchemy import func
+from datetime import timedelta
 
 
 db = SQLAlchemy()
@@ -16,6 +17,7 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
     app.config.from_object(config_class)
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=600)
 
     db.init_app(app)
     migrate.init_app(app, db)
