@@ -26,7 +26,7 @@ def index():
 @vendas_bp.route('/nova', methods=['GET', 'POST'])
 @login_required
 def nova():
-    loja_id = int(session.get('loja_id'))
+    loja_id = session.get('loja_id')
     if not loja_id:
         return redirect(url_for('loja.selecionar'))
     
