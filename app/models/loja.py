@@ -10,6 +10,8 @@ class Loja(db.Model):
     # Relationships
     vendedores = db.relationship('Vendedor', backref='loja', lazy=True)
     vendas = db.relationship('Venda', backref='loja', lazy=True)
+
+    assinaturas = db.relationship('Assinatura', backref='loja', lazy=True)
     
     def __repr__(self):
         return f'<Loja {self.nome}>'

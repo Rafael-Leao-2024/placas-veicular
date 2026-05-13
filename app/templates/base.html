@@ -105,7 +105,7 @@
                     <a href="{{ url_for('vendas.devendo') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition">💰 Devendo</a>
                     <a href="{{ url_for('relatorios.mensal') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition">📈 Relatórios Mensal</a>
                     {% if current_user.is_admin %}
-                    <a href="{{ url_for('admin.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition">⚙️ Admin</a>
+                    <a href="{{ url_for('assinatura.minha_assinatura') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition">⚙️ Assinatura</a>
                     {% endif %}
                     <a href="{{ url_for('auth.logout') }}" class="bg-red-500 hover:bg-red-600 px-3 py-2 rounded transition">🚪 Sair</a>
                 </div>
@@ -153,6 +153,10 @@
                         <span>📊</span>
                         <span>Relatório Mensal</span>
                     </a>
+                    <a href="{{ url_for('assinatura.minha_assinatura') }}" class="flex items-center space-x-3">
+                        <span>⚙️</span>
+                        <span>Assinatura</span>
+                    </a>                
                     {% if current_user.is_admin %}
                     <a href="{{ url_for('admin.index') }}" class="flex items-center space-x-3">
                         <span>⚙️</span>

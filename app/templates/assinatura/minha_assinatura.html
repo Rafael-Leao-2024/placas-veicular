@@ -1,0 +1,354 @@
+{% extends "base.html" %} 
+
+{% block title %}Minha Assinatura{% endblock %} 
+
+{% block content %}
+
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+
+  /* Cards */
+  .card-assinatura {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+
+  .card-assinatura:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Header gradiente */
+  .header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    color: white;
+  }
+
+  /* Plano principal */
+  .plano-principal {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .plano-principal::before {
+    content: '★';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    font-size: 150px;
+    opacity: 0.1;
+    transform: rotate(15deg);
+  }
+
+  /* Itens de mês */
+  .mes-item {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+  }
+
+  .mes-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    border-color: #667eea;
+  }
+
+  .mes-atual {
+    background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+    border: 2px solid #667eea;
+  }
+
+  /* Badges */
+  .badge-pago {
+    background: #10b981;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge-pendente {
+    background: #f59e0b;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .badge-atual {
+    background: #667eea;
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  /* Botões */
+  .btn-pagar {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .btn-pagar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+  }
+
+  /* Estatísticas */
+  .stat-box {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .stat-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Info box */
+  .info-box {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 1.5rem;
+    border-left: 4px solid #667eea;
+  }
+
+  /* Animações */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .fade-in {
+    animation: fadeInUp 0.5s ease forwards;
+  }
+</style>
+
+<div class="container py-4">
+  <!-- Cabeçalho -->
+  <div class="text-center mb-4 fade-in">
+    <h1 class="text-white fw-bold mb-2">
+      <i class="fas fa-crown me-2"></i>Minha Assinatura
+    </h1>
+    <p class="text-white-50">Gerencie seu plano e pagamentos</p>
+  </div>
+
+  <!-- Plano Principal -->
+  <div class="row justify-content-center mb-4 fade-in">
+    <div class="col-lg-8">
+      <div class="plano-principal">
+        <div class="row align-items-center">
+          <div class="col-md-8">
+            <span class="text text-green-900 mb-2 px-3 py-1 rounded-pill">
+              <i class="fas fa-gem me-1"></i>PLANO ATIVO
+            </span>
+            <h2 class="fw-bold mb-2">{{ assinatura.nome_plano }}</h2>
+            <div class="d-flex align-items-baseline mb-3">
+              <h1 class="display-4 fw-bold mb-0">R$ {{ "%.2f"|format(assinatura.valor_mensal) }}</h1>
+              <span class="ms-2 opacity-75">/mês</span>
+            </div>
+            <p class="mb-0">
+              <i class="fas fa-tag me-2"></i>R$ 0 por venda realizada
+            </p>
+          </div>
+          <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <div class="bg-white bg-opacity-25 rounded-3 p-3">
+              <small class="opacity-75">Próxima cobrança</small>
+              <h4 class="fw-bold mb-0">{{ data_proxima_cobranca }}</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Histórico de Meses -->
+  <h4 class="text-white mb-3 fw-bold fade-in" style="animation-delay: 0.4s">
+    <i class="fas fa-history me-2"></i>Histórico de Faturas
+  </h4>
+
+  {% for mes in historico %}
+  <div class="mes-item {% if mes.atual %}mes-atual{% endif %} fade-in" style="animation-delay: {{ 0.5 + loop.index * 0.05 }}s">
+    <div class="row align-items-center">
+      <!-- Mês e Status -->
+      <div class="col-md-3 mb-3 mb-md-0">
+        <h5 class="fw-bold mb-2">{{ mes.mes_ano }}</h5>
+        <div class="d-flex gap-2">
+          {% if mes.pago %}
+          <span class="badge-pago">
+            <i class="fas fa-check-circle me-1"></i>Pago
+          </span>
+          {% else %}
+          <span class="badge-pendente">
+            <i class="fas fa-clock me-1"></i>Pendente
+          </span>
+          {% endif %}
+          
+          {% if mes.atual %}
+          <span class="badge-atual">
+            <i class="fas fa-star me-1"></i>Atual
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Estatísticas -->
+      <div class="col-md-6 mb-3 mb-md-0">
+        <div class="row text-center">
+          <div class="col-4">
+            <small class="text-muted">Pedidos</small>
+            <h4 class="fw-bold mb-0 text-info">{{ mes.quantidade_pedidos }}</h4>
+          </div>
+          <div class="col-4">
+            <small class="text-muted">Variável</small>
+            <h5 class="fw-bold mb-0 text-warning">
+              R$ {{ "%.2f"|format(mes.valor_variavel) }}
+            </h5>
+          </div>
+          <div class="col-4">
+            <small class="text-muted">Fixo</small>
+            <h5 class="fw-bold mb-0 text-primary">
+            </h5>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total e Ação -->
+      <div class="col-md-3 text-md-end">
+        <div class="mb-2">
+          <small class="text-muted">Total do mês</small>
+          <h4 class="fw-bold text-success mb-0">
+            R$ {{ "%.2f"|format(mes.total) }}
+          </h4>
+        </div>
+        
+        {% if not mes.pago %}
+        <button class="btn-pagar" onclick='criarPagamento({{ mes | tojson | safe }})'>
+          <i class="fas fa-credit-card me-2"></i>Pagar Agora
+        </button>
+        {% else %}
+        <button class="btn btn-sm btn-outline-success" disabled style="border-radius: 25px;">
+          <i class="fas fa-check me-1"></i>Quitado
+        </button>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+  {% if not historico %}
+  <div class="card-assinatura p-5 text-center fade-in">
+    <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+    <h5 class="text-muted">Nenhum pedido registrado ainda</h5>
+    <p class="text-muted">Quando você fizer vendas, elas aparecerão aqui</p>
+  </div>
+  {% endif %}
+
+  <!-- Informações do Plano -->
+  <div class="info-box mt-4 fade-in" style="animation-delay: 0.8s">
+    <h6 class="fw-bold text-primary mb-3">
+      <i class="fas fa-info-circle me-2"></i>Como funciona seu plano
+    </h6>
+    <div class="row">
+      <div class="col-md-6">
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2">
+            <i class="fas fa-check-circle text-success me-2"></i>
+            Mensalidade: <strong>R$ {{ "%.2f"|format(assinatura.valor_mensal) }}</strong>
+          </li>
+          <li class="mb-2">
+            <i class="fas fa-check-circle text-success me-2"></i>
+          </li>
+        </ul>
+      </div>
+      <div class="col-md-6">
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2">
+            <i class="fas fa-calendar-day me-2"></i>
+            Cobrança no dia <strong>02 de cada mês</strong>
+          </li>
+          <li class="mb-2">
+            <i class="fas fa-credit-card me-2"></i>
+            Pagamento via cartão de crédito ou Pix
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  async function criarPagamento(item) {
+    const btn = event.currentTarget;
+    const textoOriginal = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processando...';
+
+    try {
+      const response = await fetch("/assinatura/criar-pagamento", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify([item]),
+      });
+
+      const data = await response.json();
+
+      if (data.payment_url) {
+        window.location.href = data.payment_url;
+      } else {
+        alert(data.error || "Erro ao gerar o link de pagamento");
+        btn.disabled = false;
+        btn.innerHTML = textoOriginal;
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Erro de conexão. Verifique sua internet.");
+      btn.disabled = false;
+      btn.innerHTML = textoOriginal;
+    }
+  }
+</script>
+
+{% endblock %}

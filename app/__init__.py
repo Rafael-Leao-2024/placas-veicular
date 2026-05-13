@@ -1,17 +1,35 @@
-from flask import Flask, redirect, url_for, session, render_template
+from flask import Flask, redirect, url_for, session, render_template, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager, current_user
 from config import Config
 from werkzeug.middleware.proxy_fix import ProxyFix
 from sqlalchemy import func
-from datetime import timedelta
+from datetime import datetime, timedelta
+
+
+meses_pt = {
+        1: "Janeiro",
+        2: "Fevereiro",
+        3: "Março",
+        4: "Abril",
+        5: "Maio",
+        6: "Junho",
+        7: "Julho",
+        8: "Agosto",
+        9: "Setembro",
+        10: "Outubro",
+        11: "Novembro",
+        12: "Dezembro",
+    }
 
 
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 
+def agora_brasil():
+    return datetime.utcnow() - timedelta(hours=3)
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -31,6 +49,8 @@ def create_app(config_class=Config):
     from app.models.produto import Produto
     from app.models.venda import Venda
     from app.models.item_venda import ItemVenda
+    from app.models.assinatura import Assinatura
+    from app.models.pagamento import Pagamento
 
     # Register blueprints
     from app.auth.routes import auth_bp
@@ -39,6 +59,7 @@ def create_app(config_class=Config):
     from app.estoque.routes import estoque_bp
     from app.vendas.routes import vendas_bp
     from app.relatorios.routes import relatorios_bp
+    from app.assinatura.routes import assinatura_bp
 
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(admin_bp, url_prefix="/admin")
@@ -46,6 +67,7 @@ def create_app(config_class=Config):
     app.register_blueprint(estoque_bp, url_prefix="/estoque")
     app.register_blueprint(vendas_bp, url_prefix="/vendas")
     app.register_blueprint(relatorios_bp, url_prefix="/relatorios")
+    app.register_blueprint(assinatura_bp, url_prefix="/assinatura")
 
     @app.route("/")
     def index():
@@ -65,6 +87,47 @@ def create_app(config_class=Config):
 
         if not session.get("loja_id"):
             return redirect(url_for("loja.selecionar"))
+        
+    
+         # se assinatura tiver com pagamento no dia 2 aberto ser redirecionado para renovação
+
+        from app.models.utlis_assinatura import criar_ou_obter_assinatura
+
+        assinatura = criar_ou_obter_assinatura(current_user.id)
+
+        # pegar Pagamento do mês atual
+        hoje = agora_brasil()
+        ano = hoje.strftime("%Y")
+
+        from app.models.pagamento import Pagamento
+
+        order_nsu = f"Assinatura {meses_pt.get((agora_brasil().month)-1, 'Dezembro').title()} / {ano}{current_user.id}"
+        pagamento = Pagamento.query.filter_by(
+            assinatura_id=assinatura.id, order_nsu=order_nsu
+        ).first()
+
+        if not pagamento:  # Se não existe pagamento para o mês atual E estamos no dia 2, 3, 4 ou 22
+            # Se não existe pagamento para o mês atual, cria um novo com status pendente
+            pagamento = Pagamento(
+                assinatura_id=assinatura.id,
+                order_nsu=order_nsu,
+                amount=assinatura.valor_mensal, # mes atual valor fixo mensal 
+                status="pendente",
+                data_criacao=agora_brasil(),
+            )
+            db.session.add(pagamento)
+            db.session.commit()
+            db.session.flush()
+
+        # Execute se a data for dia 2 e se o pagamento do mês atual estiver pendente
+        if hoje.day == 12:
+            if pagamento.status == "pendente":
+                flash(
+                    "Sua assinatura está pendente. Por favor, finalize o pagamento para continuar.",
+                    "warning",
+                )
+                return redirect(url_for("assinatura.minha_assinatura"))
+
 
         from app.models.venda import Venda
         from datetime import datetime

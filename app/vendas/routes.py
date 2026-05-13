@@ -13,18 +13,20 @@ vendas_bp = Blueprint('vendas', __name__)
 @vendas_bp.route('/')
 @login_required
 def index():
-    loja_id = session.get('loja_id')
+    loja_id = int(session.get('loja_id'))
+    print(type(loja_id))
     if not loja_id:
         return redirect(url_for('loja.selecionar'))
     
-    vendas = Venda.query.filter_by(loja_id=loja_id, ativo=True).order_by(Venda.data.desc()).all()[:100]
+    vendas = Venda.query.filter_by(loja_id=loja_id, ativo=True).order_by(Venda.data.desc()).all()
     print('{} vendo as vendas'.format(current_user.name))
     return render_template('vendas/index.html', vendas=vendas)
+
 
 @vendas_bp.route('/nova', methods=['GET', 'POST'])
 @login_required
 def nova():
-    loja_id = session.get('loja_id')
+    loja_id = int(session.get('loja_id'))
     if not loja_id:
         return redirect(url_for('loja.selecionar'))
     
