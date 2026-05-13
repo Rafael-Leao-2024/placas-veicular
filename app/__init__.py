@@ -120,7 +120,7 @@ def create_app(config_class=Config):
             db.session.flush()
 
         # Execute se a data for dia 2 e se o pagamento do mês atual estiver pendente
-        if hoje.day == 12:
+        if hoje.day == 2:
             if pagamento.status == "pendente":
                 flash(
                     "Sua assinatura está pendente. Por favor, finalize o pagamento para continuar.",
