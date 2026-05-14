@@ -86,12 +86,12 @@ def create_app(config_class=Config):
             return redirect(url_for("auth.login"))
 
         if not session.get("loja_id"):
-            return redirect(url_for("loja.selecionar"))
-        
+            return redirect(url_for("loja.selecionar"))        
     
-         # se assinatura tiver com pagamento no dia 2 aberto ser redirecionado para renovação
+         # se assinatura tiver com pagamento mes anterior pendente redirecionado para renovação
 
         from app.models.utlis_assinatura import criar_ou_obter_assinatura
+        from app.models.pagamento import Pagamento
 
         assinatura = criar_ou_obter_assinatura(current_user.id)
 
@@ -99,7 +99,6 @@ def create_app(config_class=Config):
         hoje = agora_brasil()
         ano = hoje.strftime("%Y")
 
-        from app.models.pagamento import Pagamento
 
         order_nsu = f"Assinatura {meses_pt.get((agora_brasil().month)-1, 'Dezembro').title()} / {ano}{current_user.id}"
         pagamento = Pagamento.query.filter_by(
@@ -120,13 +119,13 @@ def create_app(config_class=Config):
             db.session.flush()
 
         # Execute se a data for dia 2 e se o pagamento do mês atual estiver pendente
-        if hoje.day == 2:
-            if pagamento.status == "pendente":
-                flash(
-                    "Sua assinatura está pendente. Por favor, finalize o pagamento para continuar.",
-                    "warning",
-                )
-                return redirect(url_for("assinatura.minha_assinatura"))
+        # if hoje.day == 2:
+        if pagamento.status == "pendente":
+            flash(
+                "Sua assinatura está pendente. Por favor, finalize o pagamento para continuar.",
+                "warning",
+            )
+            return redirect(url_for("assinatura.minha_assinatura"))
 
 
         from app.models.venda import Venda

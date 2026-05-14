@@ -138,8 +138,8 @@ def criar_pagamento():
     payload = {
         "handle": "rafael-leao-da-silva-",
         "order_nsu": orden_nsu,
-        "redirect_url": "https://intuitive-cooperation-production-be94.up.railway.app/assinatura/minha-assinatura",
-        "webhook_url": "https://intuitive-cooperation-production-be94.up.railway.app/assinatura/webhook-infinitepay",
+        "redirect_url": "https://web-production-513e8.up.railway.app/assinatura/minha-assinatura",
+        "webhook_url": "https://web-production-513e8.up.railway.app/assinatura/webhook-infinitepay",
         "customer": {
             "name": "Rafael Leão da Silva",
             "email": "rafaelampaz6@gmail.com",
