@@ -93,7 +93,7 @@ def create_app(config_class=Config):
 
         from app.models.utlis_assinatura import criar_ou_obter_assinatura
 
-        assinatura = criar_ou_obter_assinatura(current_user.id)
+        assinatura = criar_ou_obter_assinatura(loja_id)
 
         # pegar Pagamento do mês atual
         hoje = agora_brasil()
