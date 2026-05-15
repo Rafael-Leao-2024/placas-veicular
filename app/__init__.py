@@ -102,7 +102,7 @@ def create_app(config_class=Config):
         ano = hoje.strftime("%Y")
 
 
-        order_nsu = f"Assinatura {meses_pt.get((agora_brasil().month)-1, 'Dezembro').title()} / {ano}{current_user.id}"
+        order_nsu = f"Assinatura {meses_pt.get((agora_brasil().month)-1, 'Dezembro').title()} / {ano}{int(loja_id)}"
         pagamento = Pagamento.query.filter_by(
             assinatura_id=assinatura.id, order_nsu=order_nsu
         ).first()
@@ -120,11 +120,11 @@ def create_app(config_class=Config):
             db.session.commit()
             db.session.flush()
 
+
         # Execute se a data for dia 2 e se o pagamento do mês atual estiver pendente
-        # if hoje.day == 2:
-        if pagamento.status == "pendente":
+        if pagamento.status.lower() == "pendente":
             flash(
-                "Sua assinatura está pendente. Por favor, finalize o pagamento para continuar.",
+                "Sua assinatura do mês atual está pendente. Por favor, realize o pagamento para continuar usando os serviços.",
                 "warning",
             )
             return redirect(url_for("assinatura.minha_assinatura"))

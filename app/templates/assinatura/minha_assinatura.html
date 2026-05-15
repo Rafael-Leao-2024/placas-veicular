@@ -178,9 +178,9 @@
       <div class="plano-principal">
         <div class="row align-items-center">
           <div class="col-md-8">
-            <span class="text text-green-900 mb-2 px-3 py-1 rounded-pill">
+            <h5 class="mb-2 px-3 py-1 rounded-pill">
               <i class="fas fa-gem me-1"></i>PLANO ATIVO
-            </span>
+            </h5>
             <h2 class="fw-bold mb-2">{{ assinatura.nome_plano }}</h2>
             <div class="d-flex align-items-baseline mb-3">
               <h1 class="display-4 fw-bold mb-0">R$ {{ "%.2f"|format(assinatura.valor_mensal) }}</h1>
@@ -235,7 +235,7 @@
       <div class="col-md-6 mb-3 mb-md-0">
         <div class="row text-center">
           <div class="col-4">
-            <small class="text-muted">Pedidos</small>
+            <small class="text-muted">Vendas</small>
             <h4 class="fw-bold mb-0 text-info">{{ mes.quantidade_pedidos }}</h4>
           </div>
           <div class="col-4">

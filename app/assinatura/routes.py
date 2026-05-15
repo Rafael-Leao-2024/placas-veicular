@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, session
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
 from sqlalchemy import extract, func
@@ -15,7 +15,10 @@ assinatura_bp = Blueprint("assinatura", __name__, url_prefix="/assinatura")
 def minha_assinatura():
     hoje = datetime.utcnow() - timedelta(hours=3)
     # === CRIA A ASSINATURA SE NÃO EXISTIR ===
-    assinatura = criar_ou_obter_assinatura(current_user.id)
+
+    loja_id = session.get("loja_id")
+
+    assinatura = criar_ou_obter_assinatura(int(loja_id))
     # Busca todos os pedidos do usuário agrupados por mês/ano
     pedidos_por_mes = (
         db.session.query(
@@ -23,7 +26,7 @@ def minha_assinatura():
             extract("month", Venda.data).label("mes"),
             func.count(Venda.id).label("quantidade"),
         )
-        .filter(Venda.vendedor_id == current_user.id)
+        .filter(Venda.loja_id == int(loja_id), Venda.ativo == True)
         .group_by(
             extract("year", Venda.data), extract("month", Venda.data)
         )
@@ -63,12 +66,12 @@ def minha_assinatura():
         total_mes = assinatura.valor_mensal
 
         nome_mes = f"{meses_pt.get(mes, 'Mês')} / {ano}"
-        print(f"Assinatura {nome_mes}{current_user.id}")
+        print(f"Assinatura {nome_mes}{int(loja_id)}")
 
         atual = ano == hoje.year and mes == hoje.month
 
         pagamento = Pagamento.query.filter(
-            (Pagamento.order_nsu == f"Assinatura {nome_mes}{current_user.id}") &
+            (Pagamento.order_nsu == f"Assinatura {nome_mes}{int(loja_id)}") &
             (Pagamento.assinatura_id == assinatura.id)
 
         ).first()
@@ -85,7 +88,8 @@ def minha_assinatura():
                 "atual": atual,
                 "pago": is_pago,  # ainda temporário
                 "produto": f"Assinatura {nome_mes}",
-                "id_usuario": str(4),
+                "loja_id": str(int(loja_id)),
+                "usuario_id": current_user.id,
             }
         )
 
@@ -113,7 +117,8 @@ def minha_assinatura():
 @login_required
 def criar_pagamento():
     items = request.get_json()
-    assinatura = criar_ou_obter_assinatura(current_user.id)
+    loja_id = session.get("loja_id")
+    assinatura = criar_ou_obter_assinatura(int(loja_id))
     orden_nsu = items[0].get("produto") + str(assinatura.loja_id)
 
     pagamento = Pagamento.query.filter(
