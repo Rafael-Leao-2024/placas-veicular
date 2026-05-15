@@ -69,6 +69,7 @@ def editar(produto_id):
         produto.preco_venda = float(request.form.get('preco_venda'))
         
         # Manual stock adjustment
+        antigo = None
         novo_estoque = int(request.form.get('estoque_atual'))
         if novo_estoque != produto.estoque_atual:
             antigo = produto.estoque_atual
