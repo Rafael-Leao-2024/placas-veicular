@@ -1,0 +1,252 @@
+{% extends "base.html" %} 
+{% block title %}Editar Despesa{% endblock %} 
+{% block content %}
+<style>
+  .edit-container {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+    padding: 40px 0;
+  }
+  
+  .card-edit {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+  }
+  
+  .card-header-edit {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 28px 32px;
+    border: none;
+  }
+  
+  .header-icon {
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    margin-bottom: 8px;
+  }
+  
+  .header-title-edit {
+    color: white;
+    font-weight: 700;
+    margin: 0;
+    font-size: 24px;
+  }
+  
+  .card-body-edit {
+    padding: 40px 32px;
+    background: white;
+  }
+  
+  .form-label-edit {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 10px;
+    font-size: 15px;
+  }
+  
+  .form-control-edit {
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    padding: 16px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+  }
+  
+  .form-control-edit:focus {
+    border-color: #ffc107;
+    box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.15);
+    background: white;
+  }
+  
+  .form-control-edit::placeholder {
+    color: #909090;
+  }
+  
+  .btn-group-edit {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 32px;
+  }
+  
+  .btn-voltar {
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 32px;
+    font-weight: 600;
+    font-size: 15px;
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn-voltar:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+    color: white;
+  }
+  
+  .btn-salvar {
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: #212529;
+    border: none;
+    border-radius: 12px;
+    padding: 16px 32px;
+    font-weight: 600;
+    font-size: 15px;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .btn-salvar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
+    color: #212529;
+  }
+  
+  .required-star {
+    color: #dc3545;
+    margin-left: 4px;
+  }
+  
+  .input-icon {
+    position: relative;
+  }
+  
+  .input-icon i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ffc107;
+    opacity: 0.6;
+  }
+  
+  .input-icon .form-control-edit {
+    padding-left: 48px;
+  }
+</style>
+
+<div class="edit-container">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-7">
+        <div class="card card-edit">
+          <div class="card-header card-header-edit">
+            <div class="text-center">
+              <div class="header-icon">
+                <i class="fas fa-edit fa-2x text-white"></i>
+              </div>
+              <h5 class="header-title-edit">Editar Despesa</h5>
+            </div>
+          </div>
+          
+          <div class="card-body card-body-edit">
+            <form method="POST">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+
+              <div class="mb-4">
+                <label class="form-label form-label-edit">
+                  Descrição <span class="required-star">*</span>
+                </label>
+                <div class="input-icon">
+                  <i class="fas fa-tag"></i>
+                  <input
+                    type="text"
+                    class="form-control form-control-edit"
+                    name="descricao"
+                    value="{{ despesa.descricao }}"
+                    placeholder="Ex: Almoço, Uber, Material..."
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label form-label-edit">
+                  Valor (R$) <span class="required-star">*</span>
+                </label>
+                <div class="input-icon">
+                  <i class="fas fa-dollar-sign"></i>
+                  <input
+                    type="number"
+                    class="form-control form-control-edit"
+                    name="valor"
+                    value="{{ despesa.valor }}"
+                    step="0.01"
+                    min="0.01"
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label form-label-edit">
+                  Data
+                </label>
+                <div class="input-icon">
+                  <i class="fas fa-calendar"></i>
+                  <input
+                    type="date"
+                    class="form-control form-control-edit"
+                    name="data_despesa"
+                    value="{{ despesa.data_despesa.strftime('%Y-%m-%d') }}"
+                  />
+                </div>
+              </div>
+
+              <div class="mb-5">
+                <label class="form-label form-label-edit">
+                  Observação
+                </label>
+                <div class="input-icon">
+                  <i class="fas fa-comment"></i>
+                  <input
+                    type="text"
+                    class="form-control form-control-edit"
+                    name="observacao"
+                    value="{{ despesa.observacao or '' }}"
+                    placeholder="Informação adicional..."
+                  />
+                </div>
+              </div>
+
+              <div class="btn-group-edit">
+                <a
+                  href="{{ url_for('despesas.listar') }}"
+                  class="btn-voltar"
+                >
+                  <i class="fas fa-arrow-left me-2"></i>Voltar
+                </a>
+                <button type="submit" class="btn-salvar">
+                  <i class="fas fa-save me-2"></i>Salvar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

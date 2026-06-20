@@ -37,6 +37,8 @@ def minha_assinatura():
         .all()
     )
 
+    print('pedido dos meses', pedidos_por_mes)
+
     historico = []
     total_acumulado = 0.0
 
@@ -73,7 +75,6 @@ def minha_assinatura():
         pagamento = Pagamento.query.filter(
             (Pagamento.order_nsu == f"Assinatura {nome_mes}{int(loja_id)}") &
             (Pagamento.assinatura_id == assinatura.id)
-
         ).first()
 
         is_pago = False
@@ -117,6 +118,7 @@ def minha_assinatura():
 @login_required
 def criar_pagamento():
     items = request.get_json()
+    print(items)
     loja_id = session.get("loja_id")
     assinatura = criar_ou_obter_assinatura(int(loja_id))
     orden_nsu = items[0].get("produto") + str(assinatura.loja_id)
@@ -195,7 +197,6 @@ def criar_pagamento():
 def webhook_pagamento():
     try:
         data = request.get_json()
-
         order_nsu = data.get("order_nsu")
 
         # Busca o pagamento que já existe

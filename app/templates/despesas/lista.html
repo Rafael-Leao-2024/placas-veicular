@@ -1,0 +1,513 @@
+{% extends "base.html" %} 
+{% block title %}Despesas Simples{% endblock %} 
+{% block content %}
+<style>
+  .despesas-container {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+  }
+  
+  .card-custom {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+  }
+  
+  .card-custom:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+  
+  .card-total {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+  }
+  
+  .card-user {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+  }
+  
+  .card-last {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+  }
+  
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 8px 0;
+  }
+  
+  .stat-label {
+    font-size: 14px;
+    opacity: 0.9;
+    margin: 0;
+  }
+  
+  .stat-count {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-top: 4px;
+  }
+  
+  .btn-nova-despesa {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+    border-radius: 10px;
+    padding: 12px 24px;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    transition: all 0.3s ease;
+  }
+  
+  .btn-nova-despesa:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+  }
+  
+  .table-custom {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .table-custom th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #e9ecef;
+    padding: 16px;
+    text-transform: uppercase;
+    font-size: 13px;
+  }
+  
+  .table-custom td {
+    padding: 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .table-custom tr:hover {
+    background: #f8f9fa;
+  }
+  
+  .valor-despesa {
+    color: #dc3545;
+    font-weight: 700;
+    font-size: 16px;
+  }
+  
+  .btn-action {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    margin: 2px;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-action:hover {
+    transform: scale(1.1);
+  }
+  
+  .btn-edit {
+    background: #ffc107;
+    color: #212529;
+  }
+  
+  .btn-delete {
+    background: #dc3545;
+    color: white;
+  }
+  
+  .modal-custom {
+    border-radius: 20px;
+  }
+  
+  .modal-header-custom {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border-radius: 20px 20px 0 0;
+    padding: 24px;
+  }
+  
+  .form-control-custom {
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    padding: 14px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+  }
+  
+  .form-control-custom:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  }
+  
+  .empty-state {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 16px;
+    padding: 60px 20px;
+  }
+  
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(0, 123, 255, 0.1);
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  
+  .header-title {
+    font-weight: 700;
+    color: #212529;
+    margin: 0;
+  }
+  
+  .header-subtitle {
+    color: #6c757d;
+    font-size: 16px;
+    margin: 0;
+  }
+</style>
+
+<div class="container-fluid py-4 despesas-container">
+  <!-- Header -->
+  <div class="row mb-5">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+      <div>
+        <h2 class="header-title">
+          <i class="fas fa-money-bill-wave text-danger me-3" style="font-size: 32px;"></i>
+          Despesas
+        </h2>
+        <p class="header-subtitle">Controle simples e inteligente</p>
+      </div>
+      <button
+        class="btn btn-nova-despesa"
+        data-bs-toggle="modal"
+        data-bs-target="#modalNovaDespesa"
+      >
+        <i class="fas fa-plus me-2"></i>Nova Despesa
+      </button>
+    </div>
+  </div>
+
+  <!-- Cards Estatísticos -->
+  <div class="row mb-5">
+    <div class="col-md-4 mb-3 mb-md-0">
+      <div class="card card-total text-white p-4">
+        <div class="card-body">
+          <div class="stat-icon">
+            <i class="fas fa-coins fa-2x"></i>
+          </div>
+          <p class="stat-label">Total de Despesas</p>
+          <h2 class="stat-value">R$ {{ "%.2f"|format(total) }}</h2>
+          <p class="stat-count">
+            <i class="fas fa-check-circle me-1"></i>
+            {{ despesas|length }} despesas registradas
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4 mb-3 mb-md-0">
+      <div class="card card-user text-white p-4">
+        <div class="card-body">
+          <div class="stat-icon">
+            <i class="fas fa-user fa-2x"></i>
+          </div>
+          <p class="stat-label">Registradas por</p>
+          <h5 class="fw-bold mb-3">{{ current_user.nome }}</h5>
+          <p class="stat-count">
+            <i class="fas fa-shield-alt me-1"></i>
+            Conta segura e protegida
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4">
+      <div class="card card-last text-white p-4">
+        <div class="card-body">
+          <div class="stat-icon">
+            <i class="fas fa-calendar fa-2x"></i>
+          </div>
+          <p class="stat-label">Última despesa</p>
+          <h5 class="fw-bold mb-3">
+            {% if despesas %} 
+              {{ despesas[0].data_despesa.strftime('%d/%m/%Y') }}
+            {% else %} 
+              <span class="opacity-75">Nenhuma registrada</span>
+            {% endif %}
+          </h5>
+          <p class="stat-count">
+            <i class="fas fa-clock me-1"></i>
+            Mantenha seu controle atualizado
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Despesas -->
+  <div class="row">
+    <div class="col-12">
+      <div class="card card-custom">
+        <div class="card-header bg-white border-0 p-4">
+          <h5 class="mb-0" style="font-weight: 700; color: #212529;">
+            <i class="fas fa-list me-2 text-primary"></i>
+            Despesas Registradas
+          </h5>
+        </div>
+        <div class="card-body p-0">
+          {% if despesas %}
+          <div class="table-responsive">
+            <table class="table table-custom mb-0">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">#</th>
+                  <th>Descrição</th>
+                  <th style="width: 140px;">Valor</th>
+                  <th style="width: 140px;">Data</th>
+                  <th>Observação</th>
+                  <th style="width: 140px; text-align: center;">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for despesa in despesas %}
+                <tr>
+                  <td>
+                    <span style="
+                      background: #007bff;
+                      color: white;
+                      width: 32px;
+                      height: 32px;
+                      display: inline-flex;
+                      align-items: center;
+                      justify-content: center;
+                      border-radius: 8px;
+                      font-weight: 600;
+                    ">
+                      {{ loop.index }}
+                    </span>
+                  </td>
+                  <td>
+                    <strong style="color: #212529; font-size: 15px;">
+                      {{ despesa.descricao }}
+                    </strong>
+                  </td>
+                  <td>
+                    <span class="valor-despesa">
+                      R$ {{ "%.2f"|format(despesa.valor) }}
+                    </span>
+                  </td>
+                  <td>
+                    <span style="
+                      background: #f8f9fa;
+                      padding: 8px 14px;
+                      border-radius: 8px;
+                      font-weight: 600;
+                      color: #495057;
+                    ">
+                      {{ despesa.data_despesa.strftime('%d/%m/%Y') }}
+                    </span>
+                  </td>
+                  <td>
+                    {% if despesa.observacao %}
+                    <small class="text-muted" style="max-width: 250px;">
+                      {{ despesa.observacao[:30] }}{% if despesa.observacao|length > 30 %}...{% endif %}
+                    </small>
+                    {% else %}
+                    <span class="text-muted">-</span>
+                    {% endif %}
+                  </td>
+                  <td style="text-align: center;">
+                    <div class="d-flex justify-content-center">
+                      <a
+                        href="{{ url_for('despesas.editar', id=despesa.id) }}"
+                        class="btn btn-action btn-edit"
+                        title="Editar"
+                      >
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <button
+                        type="button"
+                        class="btn btn-action btn-delete"
+                        onclick="excluir({{ despesa.id }}, '{{ despesa.descricao }}')"
+                        title="Excluir"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot class="table-light">
+                <tr style="background: #f8f9fa !important;">
+                  <th colspan="2" class="text-end" style="font-weight: 700;">
+                    TOTAL:
+                  </th>
+                  <th class="text-danger" style="font-weight: 700; font-size: 18px;">
+                    R$ {{ "%.2f"|format(total) }}
+                  </th>
+                  <th colspan="3"></th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          {% else %}
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="fas fa-coins fa-3x text-primary"></i>
+            </div>
+            <h5 class="text-muted mb-3" style="font-weight: 600;">
+              Nenhuma despesa registrada
+            </h5>
+            <p class="text-muted mb-4">
+              Clique em "Nova Despesa" para começar seu controle
+            </p>
+            <button
+              class="btn btn-nova-despesa"
+              data-bs-toggle="modal"
+              data-bs-target="#modalNovaDespesa"
+            >
+              <i class="fas fa-plus me-2"></i>Adicionar Primeira Despesa
+            </button>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nova Despesa -->
+<div class="modal fade modal-custom" id="modalNovaDespesa" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content modal-custom">
+      <div class="modal-header-custom text-white">
+        <h5 class="modal-title mb-0">
+          <i class="fas fa-plus-circle me-2"></i>Nova Despesa
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          style="opacity: 1;"
+        ></button>
+      </div>
+      <form method="POST" action="{{ url_for('despesas.adicionar') }}">
+        <div class="modal-body p-4">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+
+          <div class="mb-4">
+            <label class="form-label" style="font-weight: 600; color: #212529;">
+              Descrição <span class="text-danger">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control form-control-custom"
+              name="descricao"
+              placeholder="Ex: Almoço, Uber, Material..."
+              required
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label" style="font-weight: 600; color: #212529;">
+              Valor (R$) <span class="text-danger">*</span>
+            </label>
+            <input
+              type="number"
+              class="form-control form-control-custom"
+              name="valor"
+              placeholder="0.00"
+              step="0.01"
+              min="0.01"
+              required
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label" style="font-weight: 600; color: #212529;">
+              Data
+            </label>
+            <input
+              type="date"
+              class="form-control form-control-custom"
+              name="data_despesa"
+              value="{{ now.strftime('%Y-%m-%d') }}"
+            />
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label" style="font-weight: 600; color: #212529;">
+              Observação (opcional)
+            </label>
+            <input
+              type="text"
+              class="form-control form-control-custom"
+              name="observacao"
+              placeholder="Informação adicional..."
+            />
+          </div>
+        </div>
+        <div class="modal-footer border-0 p-4 pt-0">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            data-bs-dismiss="modal"
+            style="border-radius: 10px; padding: 12px 24px;"
+          >
+            Cancelar
+          </button>
+          <button 
+            type="submit" 
+            class="btn btn-nova-despesa"
+            style="padding: 12px 32px;"
+          >
+            <i class="fas fa-save me-2"></i>Adicionar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Formulário oculto para exclusão -->
+<form id="form-excluir" method="POST" style="display: none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+</form>
+
+<script>
+  function excluir(id, descricao) {
+    if (confirm(`Tem certeza que deseja excluir a despesa "${descricao}"?`)) {
+      const form = document.getElementById("form-excluir");
+      form.action = `/despesas-simples/excluir/${id}`;
+      form.submit();
+    }
+  }
+</script>
+
+{% endblock %}

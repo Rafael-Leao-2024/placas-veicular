@@ -60,6 +60,8 @@ def create_app(config_class=Config):
     from app.vendas.routes import vendas_bp
     from app.relatorios.routes import relatorios_bp
     from app.assinatura.routes import assinatura_bp
+    # Adicione no app/__init__.py
+    from app.dispesas.routes import dispesas_bp
 
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(admin_bp, url_prefix="/admin")
@@ -68,6 +70,7 @@ def create_app(config_class=Config):
     app.register_blueprint(vendas_bp, url_prefix="/vendas")
     app.register_blueprint(relatorios_bp, url_prefix="/relatorios")
     app.register_blueprint(assinatura_bp, url_prefix="/assinatura")
+    app.register_blueprint(dispesas_bp)
 
     @app.route("/")
     def index():
@@ -120,14 +123,15 @@ def create_app(config_class=Config):
             db.session.commit()
             db.session.flush()
 
-
         # Execute se a data for dia 2 e se o pagamento do mês atual estiver pendente
-        if pagamento.status.lower() == "pendente":
-            flash(
-                "Sua assinatura do mês atual está pendente. Por favor, realize o pagamento para continuar usando os serviços.",
-                "warning",
-            )
-            return redirect(url_for("assinatura.minha_assinatura"))
+
+        if hoje.day in [2, 3, 4, 5]:
+            if pagamento.status == "pendente":
+                flash(
+                    "Sua assinatura está pendente. Por favor, finalize o pagamento para continuar.",
+                    "warning",
+                )
+                return redirect(url_for("assinatura.minha_assinatura"))
 
 
         from app.models.venda import Venda
