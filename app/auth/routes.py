@@ -65,7 +65,7 @@ def callback():
                 google_id=google_id,
                 email=email,
                 name=name,
-                is_admin=True,  # First user can be made admin manually in database
+                is_admin=False,  # First user can be made admin manually in database
             )
 
             db.session.add(user)
