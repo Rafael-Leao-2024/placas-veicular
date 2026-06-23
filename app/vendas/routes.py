@@ -6,6 +6,7 @@ from app.models.item_venda import ItemVenda
 from app.models.produto import Produto
 from app.models.vendedor import Vendedor
 from datetime import date, datetime
+from app.vendas.verificar_pagamento import verificar_assinatura
 
 
 vendas_bp = Blueprint('vendas', __name__)
@@ -29,6 +30,9 @@ def nova():
     loja_id = session.get('loja_id')
     if not loja_id:
         return redirect(url_for('loja.selecionar'))
+    
+    if verificar_assinatura(loja_id=loja_id):
+        return redirect(url_for("assinatura.minha_assinatura"))
     
     if request.method == 'POST':
         cliente_nome = request.form.get('cliente_nome')

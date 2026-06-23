@@ -76,64 +76,19 @@ def create_app(config_class=Config):
     def index():
         if not current_user.is_authenticated:
             return redirect(url_for("auth.login"))
-
         # Check if user has selected a store
         if not session.get("loja_id"):
             return redirect(url_for("loja.selecionar"))
-
         return redirect(url_for("dashboard"))
+    
 
     @app.route("/dashboard")
     def dashboard():
         if not current_user.is_authenticated:
             return redirect(url_for("auth.login"))
-
         if not session.get("loja_id"):
-            return redirect(url_for("loja.selecionar"))        
-    
-         # se assinatura tiver com pagamento mes anterior pendente redirecionado para renovação
-
-        from app.models.utlis_assinatura import criar_ou_obter_assinatura
-        from app.models.pagamento import Pagamento
-
-        loja_id = session.get("loja_id")
-
-        assinatura = criar_ou_obter_assinatura(int(loja_id))
-
-        # pegar Pagamento do mês atual
-        hoje = agora_brasil()
-        ano = hoje.strftime("%Y")
-
-
-        order_nsu = f"Assinatura {meses_pt.get((agora_brasil().month)-1, 'Dezembro').title()} / {ano}{int(loja_id)}"
-        pagamento = Pagamento.query.filter_by(
-            assinatura_id=assinatura.id, order_nsu=order_nsu
-        ).first()
-
-        if not pagamento:  # Se não existe pagamento para o mês atual E estamos no dia 2, 3, 4 ou 22
-            # Se não existe pagamento para o mês atual, cria um novo com status pendente
-            pagamento = Pagamento(
-                assinatura_id=assinatura.id,
-                order_nsu=order_nsu,
-                amount=assinatura.valor_mensal, # mes atual valor fixo mensal 
-                status="pendente",
-                data_criacao=agora_brasil(),
-            )
-            db.session.add(pagamento)
-            db.session.commit()
-            db.session.flush()
-
-        # Execute se a data for dia 2 e se o pagamento do mês atual estiver pendente
-
-        if hoje.day in [2, 3, 4, 5]:
-            if pagamento.status == "pendente":
-                flash(
-                    "Sua assinatura está pendente. Por favor, finalize o pagamento para continuar.",
-                    "warning",
-                )
-                return redirect(url_for("assinatura.minha_assinatura"))
-
-
+            return redirect(url_for("loja.selecionar"))
+        
         from app.models.venda import Venda
         from datetime import datetime
 
@@ -146,7 +101,6 @@ def create_app(config_class=Config):
             .all()
         )
         vendas = [venda for venda in vendas if venda.ativo == True]
-        print(today)
 
         total_vendas = len(vendas)
         total_recebido = sum(venda.total for venda in vendas if venda.pago == True)
@@ -170,7 +124,6 @@ def create_app(config_class=Config):
     @login_manager.user_loader
     def load_user(id):
         from app.models.user import User
-
         return User.query.get(int(id))
 
     return app
