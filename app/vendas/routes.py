@@ -31,6 +31,9 @@ def nova():
     if not loja_id:
         return redirect(url_for('loja.selecionar'))
     
+    veifica_pg = verificar_assinatura(loja_id=loja_id)
+    print('pg', veifica_pg)
+    
     if verificar_assinatura(loja_id=loja_id):
         return redirect(url_for("assinatura.minha_assinatura"))
     

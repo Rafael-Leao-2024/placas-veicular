@@ -14,7 +14,7 @@ def verificar_assinatura(loja_id):
     pagamento = Pagamento.query.filter_by(
         assinatura_id=assinatura.id, order_nsu=order_nsu
     ).first()
-
+    
     if not pagamento:  # Se não existe pagamento para o mês atual E estamos no dia 2, 3, 4 ou 22
         # Se não existe pagamento para o mês atual, cria um novo com status pendente
         pagamento = Pagamento(
@@ -29,7 +29,7 @@ def verificar_assinatura(loja_id):
         db.session.flush()
     # Execute se a data for dia 2 e se o pagamento do mês atual estiver pendente
 
-    if hoje.day in [29, 30, 1, 2, 3, 4, 5, 6, 7]:
+    if hoje.day in [1, 2, 3, 4, 5, 6, 7]:
         if pagamento.status == "pendente":
             flash(
                 "Sua assinatura está pendente. Por favor, finalize o pagamento para continuar.",
