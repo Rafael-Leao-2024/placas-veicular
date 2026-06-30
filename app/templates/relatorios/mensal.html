@@ -222,13 +222,23 @@
             </div>
             <div class="text-center">
                 <div class="text-green-600 text-xl mb-1">💵</div>
-                <div class="text-gray-600 text-sm">Ticket Médio</div>
-                <div class="font-bold text-gray-800 text-lg">R$ {{ "%.2f"|format(total_vendas / vendas|length if vendas|length > 0 else 0) }}</div>
+                <div class="text-gray-600 text-sm">Total à Dinheiro</div>
+                <div class="font-bold text-gray-800 text-lg">{{ total_dinheiro }}</div>
             </div>
             <div class="text-center">
                 <div class="text-purple-600 text-xl mb-1">📈</div>
-                <div class="text-gray-600 text-sm">Taxa de Pagamento</div>
-                <div class="font-bold text-gray-800 text-lg">{{ "%.1f"|format((total_recebido / total_vendas * 100) if total_vendas > 0 else 0) }}%</div>
+                <div class="text-gray-600 text-sm">Total de Pix</div>
+                <div class="font-bold text-gray-800 text-lg">{{ total_pix }}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-purple-600 text-xl mb-1">📈</div>
+                <div class="text-gray-600 text-sm">Vendas Fiado Pago</div>
+                <div class="font-bold text-gray-800 text-lg">{{ total_fiado_pago }}</div>
+            </div>
+            <div class="text-center">
+                <div class="text-purple-600 text-xl mb-1">📈</div>
+                <div class="text-gray-600 text-sm">Vendas Fiado Pendente</div>
+                <div class="font-bold text-gray-800 text-lg">{{ total_fiado_pendente }}</div>
             </div>
         </div>
     </div>

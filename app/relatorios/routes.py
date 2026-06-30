@@ -94,6 +94,11 @@ def mensal():
         v.total for v in vendas if not v.pago and v.forma_pagamento == "fiado"
     )
 
+    total_pix = len([v for v in vendas if v.forma_pagamento == 'pix'])
+    total_dinheiro = len([v for v in vendas if v.forma_pagamento == 'dinheiro'])
+    total_fiado_pago = len([v for v in vendas if v.pago and v.forma_pagamento == "fiado"])
+    total_fiado_pendente = len([v for v in vendas if not v.pago and v.forma_pagamento == "fiado"])
+
     return render_template(
         "relatorios/mensal.html",
         vendas=vendas,
@@ -103,6 +108,10 @@ def mensal():
         total_recebido=total_recebido,
         total_devendo=total_devendo,
         nome_mes=primeiro_dia.strftime("%B"),
+        total_pix=total_pix,
+        total_dinheiro=total_dinheiro,
+        total_fiado_pago=total_fiado_pago,
+        total_fiado_pendente=total_fiado_pendente
     )
 
 
