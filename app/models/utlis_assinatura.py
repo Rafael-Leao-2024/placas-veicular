@@ -13,7 +13,7 @@ def criar_ou_obter_assinatura(loja_id):
     assinatura = Assinatura(
         loja_id=loja_id,
         nome_plano="Padrão",
-        valor_mensal=149.99,
+        valor_mensal=1.99,
         data_inicio=datetime.utcnow() - timedelta(hours=3),
         ativo=True
     )
