@@ -127,9 +127,11 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vendedor</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                        <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Unidade</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pagamento</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     </tr>
@@ -137,9 +139,11 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for venda in vendas %}
                     <tr class="hover:bg-gray-50 transition">
-                        <td class="px-6 py-4 text-sm text-gray-900 font-medium">{{ venda.cliente_nome }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900 font-medium">{{ venda.data.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900 font-medium">{{ venda.cliente_nome.title() }}</td>
                         <td class="px-6 py-4 text-sm text-gray-600">{{ venda.vendedor.user.name }}</td>
                         <td class="px-6 py-4 text-sm text-gray-900 text-right font-bold">R$ {{ "%.2f"|format(venda.total) }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900 text-right font-bold">{{ venda.itens[0].quantidade }}</td>
                         <td class="px-6 py-4 text-sm">
                             <span class="px-2 py-1 rounded-full text-xs font-semibold
                                 {% if venda.forma_pagamento == 'fiado' %}bg-yellow-100 text-yellow-800

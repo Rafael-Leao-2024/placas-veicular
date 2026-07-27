@@ -1,5 +1,9 @@
 from app import db
-from datetime import datetime
+from datetime import datetime, timedelta
+
+
+def agora_brasil():
+    return datetime.utcnow() - timedelta(hours=3)
 
 
 class Venda(db.Model):
@@ -8,7 +12,7 @@ class Venda(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     loja_id = db.Column(db.Integer, db.ForeignKey("lojas.id"), nullable=False)
     vendedor_id = db.Column(db.Integer, db.ForeignKey("vendedores.id"), nullable=False)
-    data = db.Column(db.DateTime, default=datetime.utcnow)
+    data = db.Column(db.DateTime, default=agora_brasil, nullable=False)
     cliente_nome = db.Column(db.String(255), nullable=False)
     pago = db.Column(db.Boolean, default=False)
     forma_pagamento = db.Column(
@@ -16,7 +20,7 @@ class Venda(db.Model):
     )  # cartao, pix, dinheiro, fiado
     total = db.Column(db.Float, nullable=False)
     ativo = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=agora_brasil, nullable=False)
 
     # Relationships
     itens = db.relationship(
