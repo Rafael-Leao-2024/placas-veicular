@@ -147,18 +147,18 @@ def criar_pagamento():
         "order_nsu": orden_nsu,
         "redirect_url": "https://web-production-513e8.up.railway.app/assinatura/minha-assinatura",
         "webhook_url": "https://web-production-513e8.up.railway.app/assinatura/webhook-infinitepay",
-        "customer": {
-            "name": "Rafael Leão da Silva",
-            "email": "rafaelampaz6@gmail.com",
-            "phone_number": "+5581983685747",
-        },
-        "address": {
-            "cep": "51250545",
-            "street": "Rua das Flores",
-            "neighborhood": "jordao baixo",
-            "number": "195",
-            "complement": "apos o campo",
-        },
+        # "customer": {
+        #     "name": "Rafael Leão da Silva",
+        #     "email": "rafaelampaz6@gmail.com",
+        #     "phone_number": "+5581983685747",
+        # },
+        # "address": {
+        #     "cep": "51250545",
+        #     "street": "Rua das Flores",
+        #     "neighborhood": "jordao baixo",
+        #     "number": "195",
+        #     "complement": "apos o campo",
+        # },
         "items": [
             {
                 "quantity": 1,
