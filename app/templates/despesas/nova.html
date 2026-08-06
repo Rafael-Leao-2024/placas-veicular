@@ -1,0 +1,331 @@
+{% extends "base.html" %} {% block content %}
+
+<!-- ESTILOS PERSONALIZADOS -->
+<style>
+  .page-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem 0;
+    border-radius: 0 0 30px 30px;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+  }
+
+  .page-header h2 {
+    color: white;
+    font-weight: 700;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .page-header .subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    margin-top: 0.25rem;
+  }
+
+  .btn-voltar {
+    background: rgba(255, 255, 255, 0.2);
+    color: rgb(24, 24, 24);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px;
+    padding: 10px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+
+  .btn-voltar:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: rgb(3, 3, 3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  }
+
+  .modal-custom {
+    border-radius: 20px;
+    border: none;
+    overflow: hidden;
+  }
+
+  .modal-header-custom {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 1.5rem 2rem;
+    border: none;
+  }
+
+  .modal-header-custom h5 {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .form-control-custom {
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+  }
+
+  .form-control-custom:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    background: white;
+  }
+
+  .form-control-custom:hover {
+    border-color: #a0aec0;
+    background: white;
+  }
+
+  .btn-nova-despesa {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 32px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  }
+
+  .btn-nova-despesa:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+    color: white;
+  }
+
+  .btn-nova-despesa:active {
+    transform: translateY(0);
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.3px;
+  }
+
+  .text-danger {
+    font-weight: 700;
+  }
+
+  .required-star {
+    color: #e53e3e;
+    margin-left: 2px;
+  }
+
+  .modal-body {
+    padding: 2rem !important;
+  }
+
+  .btn-close-white {
+    filter: brightness(0) invert(1);
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+  }
+
+  .btn-close-white:hover {
+    opacity: 1;
+  }
+
+  @media (max-width: 576px) {
+    .page-header {
+      padding: 1.5rem 0;
+      border-radius: 0 0 20px 20px;
+    }
+
+    .modal-body {
+      padding: 1.5rem !important;
+    }
+  }
+</style>
+
+<!-- CABEÇALHO DA PÁGINA
+<div class="page-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h2>
+                    <i class="fas fa-plus-circle me-2"></i>Nova Despesa
+                </h2>
+                <p class="subtitle">
+                    <i class="fas fa-calendar-alt me-1"></i>
+                    {{ now.strftime('%d/%m/%Y') }} • Registre sua despesa rapidamente
+                </p>
+            </div>
+            <div class="col-md-6 text-md-end mt-3 mt-md-0">
+                <a href="{{ url_for('despesas.listar') }}" class="btn btn-voltar">
+                    <i class="fas fa-arrow-left me-2"></i>Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<!-- MODAL DE NOVA DESPESA -->
+<div
+  class="modal fade modal-custom"
+  id="modalNovaDespesa"
+  tabindex="-1"
+  data-bs-backdrop="static"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content modal-custom">
+      <!-- HEADER -->
+      <div class="modal-header-custom">
+        <h5 class="modal-title">
+          <i class="fas fa-file-invoice me-2"></i>Preencher Despesa
+        </h5>
+        <button
+          type="button"
+          class="btn-close btn-close-white"
+          data-bs-dismiss="modal"
+          aria-label="Fechar"
+        ></button>
+      </div>
+
+      <!-- FORMULÁRIO -->
+      <form method="POST" action="{{ url_for('despesas.adicionar') }}">
+        <div class="modal-body">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+
+          <!-- DESCRIÇÃO -->
+          <div class="mb-4">
+            <label class="form-label">
+              <i class="fas fa-pencil-alt me-1" style="color: #667eea"></i>
+              Descrição
+              <span class="required-star">*</span>
+            </label>
+            <input
+              type="text"
+              class="form-control form-control-custom"
+              name="descricao"
+              placeholder="Ex: Almoço no restaurante, Uber, Material de escritório..."
+              required
+              autofocus
+            />
+            <small class="text-muted mt-1 d-block">
+              <i class="fas fa-info-circle me-1"></i>
+              Descreva brevemente a despesa realizada
+            </small>
+          </div>
+
+          <!-- VALOR E DATA (2 COLUNAS) -->
+          <div class="row">
+            <div class="col-md-6 mb-4">
+              <label class="form-label">
+                <i class="fas fa-dollar-sign me-1" style="color: #667eea"></i>
+                Valor (R$)
+                <span class="required-star">*</span>
+              </label>
+              <div class="input-group">
+                <span
+                  class="input-group-text"
+                  style="
+                    background: #f8fafc;
+                    border-radius: 12px 0 0 12px;
+                    border: 2px solid #e2e8f0;
+                    border-right: none;
+                    font-weight: 600;
+                  "
+                >
+                  R$
+                </span>
+                <input
+                  type="number"
+                  class="form-control form-control-custom"
+                  name="valor"
+                  placeholder="0.00"
+                  step="0.01"
+                  min="0.01"
+                  required
+                  style="border-radius: 0 12px 12px 0; border-left: none"
+                />
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+              <label class="form-label">
+                <i class="fas fa-calendar-day me-1" style="color: #667eea"></i>
+                Data da Despesa
+              </label>
+              <input
+                type="date"
+                class="form-control form-control-custom"
+                name="data_despesa"
+                value="{{ now.strftime('%Y-%m-%d') }}"
+              />
+            </div>
+          </div>
+
+          <!-- OBSERVAÇÃO -->
+          <div class="mb-3">
+            <label class="form-label">
+              <i class="fas fa-comment me-1" style="color: #667eea"></i>
+              Observação
+              <span style="font-weight: 400; color: #a0aec0; font-size: 0.8rem"
+                >(opcional)</span
+              >
+            </label>
+            <input
+              type="text"
+              class="form-control form-control-custom"
+              name="observacao"
+              placeholder="Informação adicional sobre a despesa..."
+            />
+          </div>
+
+          <!-- INDICADOR DE CAMPOS OBRIGATÓRIOS -->
+          <div
+            class="mt-3 pt-2 border-top"
+            style="border-color: #e2e8f0 !important"
+          >
+            <small class="text-muted">
+              <span class="required-star">*</span> Campos obrigatórios
+            </small>
+          </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="modal-footer border-0 p-4 pt-0">
+          <!-- botao ancora para voltar para lista de despesas --->
+          <a
+            href="{{ url_for('despesas.listar') }}"
+            class="btn btn-voltar me-2"
+          >
+            <i class="fas fa-arrow-left me-1"></i>Voltar
+          </a>
+
+          <button type="submit" class="btn btn-nova-despesa">
+            <i class="fas fa-save me-2"></i>Salvar Despesa
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- SCRIPT PARA ABRIR MODAL AUTOMATICAMENTE -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Abrir o modal automaticamente ao carregar a página
+    var modal = new bootstrap.Modal(
+      document.getElementById("modalNovaDespesa"),
+      {
+        backdrop: "static",
+        keyboard: true,
+      },
+    );
+    modal.show();
+
+    // Focar no primeiro campo após abrir
+    document
+      .getElementById("modalNovaDespesa")
+      .addEventListener("shown.bs.modal", function () {
+        document.querySelector('input[name="descricao"]').focus();
+      });
+  });
+</script>
+
+{% endblock content %}

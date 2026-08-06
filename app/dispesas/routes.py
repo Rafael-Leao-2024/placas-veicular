@@ -3,20 +3,41 @@ from flask import render_template, redirect, url_for, flash, request, jsonify, s
 from flask_login import login_required, current_user
 from app import db
 from app.models.dispesas import DespesaSimples
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 
 
 dispesas_bp = Blueprint('despesas', __name__, url_prefix='/despesas-simples')
 
+
 @dispesas_bp.route('/')
 @login_required
 def listar():
-    """Lista todas as despesas simples"""
+    """Lista todas as despesas simples do dia atual"""
     loja_id = session.get('loja_id')
-    despesas = DespesaSimples.query.filter(DespesaSimples.loja_id == loja_id).order_by(DespesaSimples.data_despesa.desc()).all()
+    
+    # Data atual (sem hora)
+    data_atual = date.today()
+    
+    # Filtrar despesas apenas do dia atual
+    despesas = DespesaSimples.query.filter(
+        DespesaSimples.loja_id == loja_id,
+        DespesaSimples.data_despesa >= data_atual,
+        DespesaSimples.data_despesa < data_atual + timedelta(days=1)
+    ).order_by(DespesaSimples.data_despesa.desc()).all()
+    
     total = sum(d.valor for d in despesas)
-    return render_template('despesas/lista.html', despesas=despesas, total=total, now=datetime.now())
+    return render_template('despesas/lista.html', 
+                         despesas=despesas, 
+                         total=total, 
+                         now=datetime.now())
+
+
+@dispesas_bp.route('/nova')
+@login_required
+def nova():
+    """Exibe o formulário para adicionar uma nova despesa"""
+    return render_template('despesas/nova.html', now=datetime.now())
 
 
 @dispesas_bp.route('/adicionar', methods=['POST'])

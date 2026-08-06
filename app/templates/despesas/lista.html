@@ -1,42 +1,41 @@
-{% extends "base.html" %} 
-{% block title %}Despesas Simples{% endblock %} 
-{% block content %}
+{% extends "base.html" %} {% block title %}Despesas Simples{% endblock %} {%
+block content %}
 <style>
   .despesas-container {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     min-height: 100vh;
   }
-  
+
   .card-custom {
     border: none;
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
   }
-  
+
   .card-custom:hover {
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
     transform: translateY(-2px);
   }
-  
+
   .card-total {
     background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
     border-radius: 16px;
     box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
   }
-  
+
   .card-user {
     background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
     border-radius: 16px;
     box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
   }
-  
+
   .card-last {
     background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
     border-radius: 16px;
     box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
   }
-  
+
   .stat-icon {
     width: 48px;
     height: 48px;
@@ -47,25 +46,25 @@
     border-radius: 12px;
     margin-bottom: 12px;
   }
-  
+
   .stat-value {
     font-size: 28px;
     font-weight: 700;
     margin: 8px 0;
   }
-  
+
   .stat-label {
     font-size: 14px;
     opacity: 0.9;
     margin: 0;
   }
-  
+
   .stat-count {
     font-size: 12px;
     opacity: 0.8;
     margin-top: 4px;
   }
-  
+
   .btn-nova-despesa {
     background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
     border: none;
@@ -75,18 +74,18 @@
     box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
     transition: all 0.3s ease;
   }
-  
+
   .btn-nova-despesa:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
   }
-  
+
   .table-custom {
     background: white;
     border-radius: 12px;
     overflow: hidden;
   }
-  
+
   .table-custom th {
     background: #f8f9fa;
     font-weight: 600;
@@ -96,23 +95,23 @@
     text-transform: uppercase;
     font-size: 13px;
   }
-  
+
   .table-custom td {
     padding: 16px;
     vertical-align: middle;
     border-bottom: 1px solid #f0f0f0;
   }
-  
+
   .table-custom tr:hover {
     background: #f8f9fa;
   }
-  
+
   .valor-despesa {
     color: #dc3545;
     font-weight: 700;
     font-size: 16px;
   }
-  
+
   .btn-action {
     width: 36px;
     height: 36px;
@@ -123,31 +122,31 @@
     margin: 2px;
     transition: all 0.2s ease;
   }
-  
+
   .btn-action:hover {
     transform: scale(1.1);
   }
-  
+
   .btn-edit {
     background: #ffc107;
     color: #212529;
   }
-  
+
   .btn-delete {
     background: #dc3545;
     color: white;
   }
-  
+
   .modal-custom {
     border-radius: 20px;
   }
-  
+
   .modal-header-custom {
     background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
     border-radius: 20px 20px 0 0;
     padding: 24px;
   }
-  
+
   .form-control-custom {
     border-radius: 10px;
     border: 1px solid #e0e0e0;
@@ -155,18 +154,18 @@
     font-size: 15px;
     transition: all 0.3s ease;
   }
-  
+
   .form-control-custom:focus {
     border-color: #007bff;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
   }
-  
+
   .empty-state {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-radius: 16px;
     padding: 60px 20px;
   }
-  
+
   .empty-icon {
     width: 80px;
     height: 80px;
@@ -177,13 +176,13 @@
     justify-content: center;
     margin-bottom: 24px;
   }
-  
+
   .header-title {
     font-weight: 700;
     color: #212529;
     margin: 0;
   }
-  
+
   .header-subtitle {
     color: #6c757d;
     font-size: 16px;
@@ -195,20 +194,20 @@
   <!-- Header -->
   <div class="row mb-5">
     <div class="col-12 d-flex justify-content-between align-items-center">
-      <div>
+      <!-- <div>
         <h2 class="header-title">
           <i class="fas fa-money-bill-wave text-danger me-3" style="font-size: 32px;"></i>
           Despesas
         </h2>
-        <p class="header-subtitle">Controle simples e inteligente</p>
-      </div>
-      <button
+      </div> -->
+      <!-- nova dispesas -->
+      <a
+        href="{{ url_for('despesas.nova') }}"
         class="btn btn-nova-despesa"
-        data-bs-toggle="modal"
-        data-bs-target="#modalNovaDespesa"
+        style="padding: 12px 32px; font-size: 15px"
       >
         <i class="fas fa-plus me-2"></i>Nova Despesa
-      </button>
+      </a>
     </div>
   </div>
 
@@ -229,8 +228,8 @@
         </div>
       </div>
     </div>
-    
-    <div class="col-md-4 mb-3 mb-md-0">
+
+    <!-- <div class="col-md-4 mb-3 mb-md-0">
       <div class="card card-user text-white p-4">
         <div class="card-body">
           <div class="stat-icon">
@@ -244,9 +243,9 @@
           </p>
         </div>
       </div>
-    </div>
-    
-    <div class="col-md-4">
+    </div> -->
+
+    <!-- <div class="col-md-4">
       <div class="card card-last text-white p-4">
         <div class="card-body">
           <div class="stat-icon">
@@ -266,53 +265,55 @@
           </p>
         </div>
       </div>
-    </div>
+    </div> -->
   </div>
 
   <!-- Lista de Despesas -->
   <div class="row">
     <div class="col-12">
       <div class="card card-custom">
-        <div class="card-header bg-white border-0 p-4">
-          <h5 class="mb-0" style="font-weight: 700; color: #212529;">
+        <!-- <div class="card-header bg-white border-0 p-4">
+          <h5 class="mb-0" style="font-weight: 700; color: #212529">
             <i class="fas fa-list me-2 text-primary"></i>
             Despesas Registradas
           </h5>
-        </div>
+        </div> -->
         <div class="card-body p-0">
           {% if despesas %}
           <div class="table-responsive">
             <table class="table table-custom mb-0">
               <thead>
                 <tr>
-                  <th style="width: 60px;">#</th>
+                  <th style="width: 60px">#</th>
                   <th>Descrição</th>
-                  <th style="width: 140px;">Valor</th>
-                  <th style="width: 140px;">Data</th>
+                  <th style="width: 140px">Valor</th>
+                  <th style="width: 140px">Data</th>
                   <th>Observação</th>
-                  <th style="width: 140px; text-align: center;">Ações</th>
+                  <th style="width: 140px; text-align: center">Ações</th>
                 </tr>
               </thead>
               <tbody>
                 {% for despesa in despesas %}
                 <tr>
                   <td>
-                    <span style="
-                      background: #007bff;
-                      color: white;
-                      width: 32px;
-                      height: 32px;
-                      display: inline-flex;
-                      align-items: center;
-                      justify-content: center;
-                      border-radius: 8px;
-                      font-weight: 600;
-                    ">
+                    <span
+                      style="
+                        background: #007bff;
+                        color: white;
+                        width: 32px;
+                        height: 32px;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 8px;
+                        font-weight: 600;
+                      "
+                    >
                       {{ loop.index }}
                     </span>
                   </td>
                   <td>
-                    <strong style="color: #212529; font-size: 15px;">
+                    <strong style="color: #212529; font-size: 15px">
                       {{ despesa.descricao }}
                     </strong>
                   </td>
@@ -322,26 +323,29 @@
                     </span>
                   </td>
                   <td>
-                    <span style="
-                      background: #f8f9fa;
-                      padding: 8px 14px;
-                      border-radius: 8px;
-                      font-weight: 600;
-                      color: #495057;
-                    ">
+                    <span
+                      style="
+                        background: #f8f9fa;
+                        padding: 8px 14px;
+                        border-radius: 8px;
+                        font-weight: 600;
+                        color: #495057;
+                      "
+                    >
                       {{ despesa.data_despesa.strftime('%d/%m/%Y') }}
                     </span>
                   </td>
                   <td>
                     {% if despesa.observacao %}
-                    <small class="text-muted" style="max-width: 250px;">
-                      {{ despesa.observacao[:30] }}{% if despesa.observacao|length > 30 %}...{% endif %}
+                    <small class="text-muted" style="max-width: 250px">
+                      {{ despesa.observacao[:30] }}{% if
+                      despesa.observacao|length > 30 %}...{% endif %}
                     </small>
                     {% else %}
                     <span class="text-muted">-</span>
                     {% endif %}
                   </td>
-                  <td style="text-align: center;">
+                  <td style="text-align: center">
                     <div class="d-flex justify-content-center">
                       <a
                         href="{{ url_for('despesas.editar', id=despesa.id) }}"
@@ -364,11 +368,14 @@
                 {% endfor %}
               </tbody>
               <tfoot class="table-light">
-                <tr style="background: #f8f9fa !important;">
-                  <th colspan="2" class="text-end" style="font-weight: 700;">
+                <tr style="background: #f8f9fa !important">
+                  <th colspan="2" class="text-end" style="font-weight: 700">
                     TOTAL:
                   </th>
-                  <th class="text-danger" style="font-weight: 700; font-size: 18px;">
+                  <th
+                    class="text-danger"
+                    style="font-weight: 700; font-size: 18px"
+                  >
                     R$ {{ "%.2f"|format(total) }}
                   </th>
                   <th colspan="3"></th>
@@ -381,7 +388,7 @@
             <div class="empty-icon">
               <i class="fas fa-coins fa-3x text-primary"></i>
             </div>
-            <h5 class="text-muted mb-3" style="font-weight: 600;">
+            <h5 class="text-muted mb-3" style="font-weight: 600">
               Nenhuma despesa registrada
             </h5>
             <p class="text-muted mb-4">
@@ -403,7 +410,7 @@
 </div>
 
 <!-- Modal Nova Despesa -->
-<div class="modal fade modal-custom" id="modalNovaDespesa" tabindex="-1">
+<!-- <div class="modal fade modal-custom" id="modalNovaDespesa" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content modal-custom">
       <div class="modal-header-custom text-white">
@@ -493,7 +500,7 @@
       </form>
     </div>
   </div>
-</div>
+</div> -->
 
 <!-- Formulário oculto para exclusão -->
 <form id="form-excluir" method="POST" style="display: none">
