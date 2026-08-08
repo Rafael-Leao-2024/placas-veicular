@@ -3,6 +3,7 @@ from app.models.pagamento import Pagamento
 from flask import session, redirect, url_for, flash
 from app import agora_brasil, meses_pt, db
 
+
 def verificar_assinatura(loja_id):
     assinatura = criar_ou_obter_assinatura(int(loja_id))
 
@@ -29,7 +30,7 @@ def verificar_assinatura(loja_id):
         db.session.flush()
     # Execute se a data for dia 2 e se o pagamento do mês atual estiver pendente
 
-    if hoje.day in [2, 3, 4, 5, 6, 7]:
+    if hoje.day > 2 and hoje.day < 10:
         if pagamento.status == "pendente":
             flash(
                 "Sua assinatura está pendente. Por favor, finalize o pagamento para continuar.",
