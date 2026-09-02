@@ -30,7 +30,7 @@ def verificar_assinatura(loja_id):
         db.session.flush()
     # Execute se a data for dia 2 e se o pagamento do mês atual estiver pendente
 
-    if hoje.day > 2 and hoje.day < 10:
+    if hoje.day >= 2 and hoje.day < 10:
         if pagamento.status == "pendente":
             flash(
                 "Sua assinatura está pendente. Por favor, finalize o pagamento para continuar.",
